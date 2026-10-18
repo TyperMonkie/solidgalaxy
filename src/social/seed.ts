@@ -1,5 +1,22 @@
 import { createPreset } from '../planet/PlanetPresets.ts';
+import { Color, SRGBColorSpace } from 'three';
 import type { SocialState, Resident } from './model.ts';
+const DEMO_VISUAL_VERSION=2;
+function demoRenderSpec(i:number,energy:number,exploration:number,color:string){
+ const renderSpec=createPreset(i%3===0?'nebula':i%3===1?'crystal':'fracture',900071+i*271);
+ const hsl=new Color(color).getHSL({h:0,s:0,l:0},SRGBColorSpace);
+ const tint=(s:number,l:number)=>'#'+new Color().setHSL(hsl.h,s,l,SRGBColorSpace).getHexString();
+ // Three distinct luminance roles: pastel-on-pastel erased the terrain detail.
+ renderSpec.material.palette=[tint(.5,.055),tint(Math.max(.44,hsl.s),.27+energy*.06),tint(.46,.72)];
+ renderSpec.geometry.complexity=.25+exploration*.65;
+ renderSpec.geometry.displacement=.06+energy*.24;
+ renderSpec.orbits.type=(['ribbons','broken','dust','angular'] as const)[i%4];
+ renderSpec.atmosphere.color=tint(.5,.6);
+ renderSpec.modules.clouds=energy<.65;
+ renderSpec.animation.rotation=.025+energy*.07;
+ renderSpec.mascot.enabled=false;renderSpec.landmarks=[];
+ return renderSpec;
+}
 const characters:[string,string,string,string[],number,number,number,string,string][]=[
  ['you','未命名旅人','我喜欢有温度的相遇，也想去看看不一样的世界。',['音乐','散步','好奇心'],.52,.55,.65,'#8fcbbc','给相遇一点引力'],
  ['morrow','晚风来信','慢热但认真，喜欢听完一个人的故事再开口。',['温柔','阅读','散步'],.20,.35,.90,'#d3c39c','把月光留给你'],
@@ -21,8 +38,20 @@ const characters:[string,string,string,string[],number,number,number,string,stri
  ['orbit','环形笔记','不太会寒暄，但对喜欢的事物可以聊上整晚。',['科幻','游戏','音乐'],.55,.62,.41,'#a6a1df','为共鸣留一席'],
  ];
 export function seedSocialState():SocialState{
- const now=Date.now();const residents:Resident[]=characters.map(([id,name,bio,tags,energy,exploration,warmth,color,title],i)=>{const style=i%3===0?'nebula':i%3===1?'crystal':'fracture';const renderSpec=createPreset(style,900071+i*271);renderSpec.material.palette=['#0b1220',color,color];renderSpec.geometry.complexity=.25+exploration*.65;renderSpec.geometry.displacement=.06+energy*.24;renderSpec.orbits.type=(['ribbons','broken','dust','angular'] as const)[i%4];renderSpec.modules.clouds=i%4===0;renderSpec.animation.rotation=.025+energy*.07;renderSpec.mascot.enabled=false;renderSpec.landmarks=[];return {id,name,bio,tags,fictional:id!=='you',signature:{energy,exploration,warmth,summary:bio},renderSpec,worldTitle:title,updatedAt:new Date(now).toISOString(),source:'demo',revision:0,analyzedRevision:0};});
+ const now=Date.now();const residents:Resident[]=characters.map(([id,name,bio,tags,energy,exploration,warmth,color,title],i)=>{const renderSpec=demoRenderSpec(i,energy,exploration,color);return {id,name,bio,tags,fictional:id!=='you',signature:{energy,exploration,warmth,summary:bio},renderSpec,worldTitle:title,updatedAt:new Date(now).toISOString(),source:'demo',revision:0,analyzedRevision:0};});
  const words:Record<string,string[]>={you:['第一次把自己的小世界，放进更大的宇宙。你好，路过的人。'],morrow:['今天散步时听完了朋友一个很长的故事。能被认真听见，也是一种拥抱。','书店的灯很暖，买了一本没有计划要买的书。'],echo:['昨晚现场所有人一起唱副歌的时候，突然觉得自己没有那么孤单。','新学的吉他和弦还会按错，但先录下来再说。'],moss:['山路上碰见一束很小的光。拍照之前，先站着看了一会儿。'],lune:['如果今天有点累，就把想说的话留到明天吧。月亮不会催你。'],tea:['煮了一锅番茄汤。朋友说好喝，今天就已经很值得。'],atlas:['在没有信号的地方，反而听清楚了自己在想什么。'],io:['路过一栋很奇怪的楼，窗户的排列像一首没有鼓点的电子乐。'],tangerine:['朋友们！发现一家会把橘子皮做成糖的店，下次一起去！'],pixel:['给小游戏加了一个会迷路的NPC。突然觉得它很像我。'],kite:['买了明天出发的车票。目的地先保密，回来再告诉你们。']};
  const posts=residents.flatMap((r,i)=>(words[r.id]||[`${r.bio} 今天也在自己的轨道上，等待一次刚刚好的相遇。`]).map((text,k)=>({id:`demo-${r.id}-${k}`,authorId:r.id,text,image:'',createdAt:new Date(now-(i*3+k*19+1)*3600000).toISOString(),likes:[]})));
- return {version:1,residents,posts,friendships:[]};
+ return {version:1,demoVisualVersion:DEMO_VISUAL_VERSION,residents,posts,friendships:[]};
+}
+/** Upgrade old demo artwork once; never replace AI/studio worlds or social data. */
+export function upgradeDemoVisuals(state:SocialState){
+ if((state.demoVisualVersion??0)>=DEMO_VISUAL_VERSION)return false;
+ for(const resident of state.residents){
+  if(resident.source!=='demo')continue;
+  const i=characters.findIndex(c=>c[0]===resident.id);
+  if(i<0)continue;
+  const character=characters[i];
+  resident.renderSpec=demoRenderSpec(i,character[4],character[5],character[7]);
+ }
+ state.demoVisualVersion=DEMO_VISUAL_VERSION;return true;
 }

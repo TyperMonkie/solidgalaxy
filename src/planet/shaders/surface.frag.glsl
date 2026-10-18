@@ -11,8 +11,10 @@ void main(){
   vec3 dx=surfacePoint(normalize(p+epsilon*tangent));
   vec3 dy=surfacePoint(normalize(p+epsilon*bitangent));
   vec3 localNormal=normalize(cross(dx-pos,dy-pos));
+  // Mineral relief reads as satin stone; keep micro-slopes from dominating
+  // the globe's broad lighting, including legacy low-roughness configurations.
+  if(uStyle>1.5)localNormal=normalize(mix(p,localNormal,.25));
   vec3 N=normalize(normalMatrix*localNormal);
-  if(uStyle>1.5)N=normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition)));
   vec3 V=normalize(-vViewPosition),L=normalize((viewMatrix*vec4(-2.8,3.5,3.8,0.)).xyz),H=normalize(V+L);
   vec3 color;float emission=0.,water=0.;
   if(uStyle<.5){
@@ -37,18 +39,24 @@ void main(){
     float hairline=pow(max(0.,1.-abs(simplex3(p*18.))*35.),3.);
     emission+=hairline*.1*smoothstep(.15,.35,h);
   }else{
-    float mineral=simplex3(p*4.+uSeed)*.5+.5;
-    color=mix(uPalette[0],uPalette[1],mineral);
-    color=mix(color,uPalette[2],smoothstep(.22,.4,h)*.6);
-    float boundary=pow(max(0.,1.-abs(simplex3(p*9.))*14.),5.);
-    emission=boundary*.2;
+    // Layered mineral strata and fine veins, rather than painted low-poly faces.
+    vec3 warp=p+vec3(simplex3(p*3.+uSeed),simplex3(p*3.+11.),simplex3(p*3.-7.))*.12;
+    float mineral=simplex3(warp*5.+uSeed)*.5+.5;
+    float strata=.5+.5*sin(warp.y*42.+mineral*9.+simplex3(warp*13.)*2.);
+    float grain=simplex3(p*95.+uSeed)*.025+simplex3(p*190.)*.01;
+    color=mix(uPalette[0],uPalette[1],.38+.52*smoothstep(.18,.78,mineral));
+    color*=.92+strata*.1+grain;
+    float boundary=1.-smoothstep(.012,.045,abs(simplex3(warp*16.)));
+    float deposits=smoothstep(.62,.84,simplex3(warp*31.)*.5+.5);
+    color=mix(color,uPalette[2],deposits*.12+boundary*.06);
+    emission=boundary*(.14+.04*sin(uTime*.25+p.y*8.));
   }
   float diffuse=max(dot(N,L),0.),rough=mix(uRoughness,.17,water);
   float specular=pow(max(dot(N,H),0.),mix(140.,12.,rough))*(1.-rough*.7);
   float sky=max(dot(N,normalize((viewMatrix*vec4(0,1,0,0)).xyz))*.5+.5,0.);
   float rim=pow(1.-max(dot(N,V),0.),4.);
   vec3 lit=color*(uAmbient+diffuse*uLight)+color*sky*.04;
-  lit+=mix(vec3(.82,.88,1.),color,uMetalness)*specular*uLight*.55;
+  lit+=mix(vec3(.82,.88,1.),color,uMetalness)*specular*uLight*(uStyle>1.5?.12:.55);
   lit+=uPalette[2]*(emission*uEmission+rim*.065);
   gl_FragColor=vec4(lit,1.);
   #include <tonemapping_fragment>

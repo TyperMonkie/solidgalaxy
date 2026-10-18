@@ -7,7 +7,7 @@ export type Signature=z.infer<typeof SignatureSchema>;
 export interface SocialPost {id:string;authorId:string;text:string;image:string;createdAt:string;likes:string[];}
 export interface Resident {id:string;name:string;bio:string;tags:string[];fictional:boolean;signature:Signature;renderSpec:RenderSpec;dna?:UniverseDNA;mascotArtwork?:string;coordinateStatus?:'pending'|'ready'|'error';worldTitle:string;updatedAt:string;source:'demo'|'ai'|'studio';revision:number;analyzedRevision:number;updateError?:string;}
 export interface Friendship {id:string;from:string;to:string;status:'pending'|'accepted'|'declined';createdAt:string;}
-export interface SocialState {version:1;residents:Resident[];posts:SocialPost[];friendships:Friendship[];}
+export interface SocialState {version:1;demoVisualVersion?:number;residents:Resident[];posts:SocialPost[];friendships:Friendship[];}
 export interface SearchHit {id:string;reason:string;opener:string;}
 export interface SearchResult {hits:SearchHit[];mode:'semantic'|'local';message:string;}
 export const PostInputSchema=z.strictObject({text:z.string().trim().max(2000),image:z.string().max(3000000).regex(/^(data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+)?$/)}).refine(v=>!!v.text||!!v.image,{message:'Write something or attach a picture.'});

@@ -19,10 +19,10 @@ export function createStructures(s:RenderSpec){
   const r=(slot:number)=>hashSeed(s.seed,100+i*7+slot);
   // Low-complexity worlds grow in a tilted belt; complex worlds scatter across the globe.
   const y=(r(1)*2-1)*(.35+.65*complexity),a=r(2)*Math.PI*2+Math.sin(y*5)*(.8-complexity*.6),rad=Math.sqrt(1-y*y),dir=new Vector3(Math.cos(a)*rad,y,Math.sin(a)*rad);
-  const length=crystal?(.13+r(3)*(.18+complexity*.34))*(.8+relief*.6):(.045+r(3)*(.07+complexity*.08))*(.8+relief*.75);
-  dummy.position.copy(dir).multiplyScalar(crystal?1.0+length*.3:1.08+relief*.2+r(4)*.07);
+  const length=crystal?(.06+r(3)*(.07+complexity*.03))*(.8+relief*.3):(.045+r(3)*(.07+complexity*.08))*(.8+relief*.75);
+  dummy.position.copy(dir).multiplyScalar(crystal?1.015+length*.12:1.08+relief*.2+r(4)*.07);
   dummy.quaternion.setFromUnitVectors(up,dir);dummy.rotateY(r(5)*Math.PI);dummy.rotateX((r(4)-.5)*.3);
-  const width=crystal?(.055+r(6)*.1)*(.8+complexity*.5):length*.9;
+  const width=crystal?(.018+r(6)*.025)*(.8+complexity*.3):length*.9;
   if(crystal)dummy.scale.set(width,length,width*.8);else dummy.scale.set(length*1.2,length*.36,length*.7);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
   mesh.setColorAt(i,palette[i%3].clone().lerp(palette[(i+1)%3],r(5)*.45).lerp(new Color('#ffffff'),crystal?.12+r(6)*.2:r(6)*.08));
  }

@@ -27,10 +27,10 @@ export function createPreset(style: Style, seed = 78291): RenderSpec {
   }
   if (style === 'crystal') {
     common.geometry = { enabled: true, type: 'faceted', complexity: 0.6, displacement: 0.13 };
-    common.material = { palette: ['#152a36','#5f8e9e','#a6f1e8'], roughness: 0.24, metalness: 0.6, emission: 0.15 };
+    common.material = { palette: ['#111c32','#426687','#b1e7dd'], roughness: 0.62, metalness: 0.22, emission: 0.15 };
     common.atmosphere = { enabled: true, color: '#71b9d4', strength: 0.28 };
     common.orbits = { enabled: true, type: 'angular', tilt: 0.45 };
-    common.structures.count = 22; common.animation = { enabled: true, rotation: 0.028, flow: 0.1 };
+    common.structures.count = 0; common.animation = { enabled: true, rotation: 0.028, flow: 0.1 };
   }
   return validateRenderSpec(common);
 }

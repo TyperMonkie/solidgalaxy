@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
@@ -27,6 +27,23 @@ test('Local store serializes concurrent mutations and survives a fresh instance'
  const dir=await mkdtemp(join(tmpdir(),'personaverse-store-'));try{const path=join(dir,'world.json'),store=new SocialStore(path);
  await Promise.all(Array.from({length:15},()=>store.mutate(s=>{s.residents[0].revision++;})));
  const restored=await new SocialStore(path).read();assert.equal(restored.residents[0].revision,15);assert.equal(JSON.parse(await readFile(path,'utf8')).version,1);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('Legacy demo artwork migrates once without changing AI/studio worlds, posts or friendships',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'personaverse-visual-migration-'));
+ try{
+  const path=join(dir,'world.json'),legacy=seedSocialState();delete legacy.demoVisualVersion;
+  legacy.residents[1].source='ai';legacy.residents[2].source='studio';
+  for(const r of legacy.residents){r.renderSpec.structures={enabled:true,count:22};r.renderSpec.material.palette=['#0b1220','#b6a1cc','#b6a1cc'];}
+  legacy.friendships.push({id:'preserve-friend',from:'you',to:'morrow',status:'accepted',createdAt:new Date(0).toISOString()});
+  const original=structuredClone(legacy);await writeFile(path,JSON.stringify(legacy));
+  const migrated=await new SocialStore(path).read();
+  assert.deepEqual(migrated.residents[1],original.residents[1]);assert.deepEqual(migrated.residents[2],original.residents[2]);
+  assert.deepEqual(migrated.posts,original.posts);assert.deepEqual(migrated.friendships,original.friendships);
+  assert.deepEqual(migrated.residents.map(r=>[r.id,r.signature,r.revision,r.analyzedRevision]),original.residents.map(r=>[r.id,r.signature,r.revision,r.analyzedRevision]));
+  const vinyl=migrated.residents.find(r=>r.id==='vinyl')!;
+  assert.notDeepEqual(vinyl.renderSpec,original.residents.find(r=>r.id==='vinyl')!.renderSpec);
+  assert.deepEqual(await new SocialStore(path).read(),migrated);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 async function localApi(run:(request:(path:string,body?:unknown,id?:string)=>Promise<{status:number;body:any}>,store:SocialStore)=>Promise<void>,ai?:Parameters<typeof socialApi>[3]){
