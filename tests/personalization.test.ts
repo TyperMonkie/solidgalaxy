@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { compileUniverse, generateUniverse, descriptionContent } from '../src/ai/client.ts';
 import { createPreset } from '../src/planet/PlanetPresets.ts';
+import { validateRenderSpec } from '../src/planet/RenderSpec.ts';
 import { DNASchema } from '../src/ai/schemas.ts';
+import { draftToContent, exampleDraft } from '../src/ai/draft.ts';
+import { landmarkPositions } from '../src/planet/PlanetLandmarks.ts';
+import type { LandmarkSpec } from '../src/planet/RenderSpec.ts';
 
 test('Description becomes validated DNA before compilation; switching direction reuses the interpretation',async t=>{
  const recorded=JSON.parse(await readFile(new URL('../docs/ai-ui-result.json',import.meta.url),'utf8'));
@@ -29,6 +33,14 @@ test('Description becomes validated DNA before compilation; switching direction 
  assert.equal(revised.dna.seed,result.dna.seed);
 });
 
+test('World symbols are packed apart with only three near the mascot',()=>{
+ const items=Array.from({length:8},(_,i)=>({id:`s${i}`,icon:'music',label:'Music',meaning:'A supplied musical preference',color:'#f4c795',placement:i<3?'companion':'surface',evidenceIds:['music:0']} as LandmarkSpec));
+ const positions=landmarkPositions(items);
+ assert.deepEqual(positions.map(p=>p.toArray()),landmarkPositions(items).map(p=>p.toArray()));
+ positions.forEach(p=>assert.ok(Math.abs(p.length()-1)<1e-6));
+ for(let i=0;i<positions.length;i++)for(let j=i+1;j<positions.length;j++)assert.ok(positions[i].distanceTo(positions[j])>.4,'No overlapping symbol cluster');
+});
+
 test('An invalid profile cannot reach the compiler; provider errors stay visible',async t=>{
  let count=0;
  const mock=t.mock.method(globalThis,'fetch',async()=>{count++;return Response.json({dna:{title:'Incomplete'}});});
@@ -36,4 +48,14 @@ test('An invalid profile cannot reach the compiler; provider errors stay visible
  assert.equal(count,1);
  mock.mock.mockImplementation(async()=>Response.json({error:'Provider unavailable'},{status:503}));
  await assert.rejects(generateUniverse(descriptionContent('A fictional description.')),/Provider unavailable/);
+});
+
+test('Categorized fragments keep their semantic source types and mascot catalog rejects invented props',()=>{
+ const content=draftToContent(exampleDraft(),123);
+ assert.equal(content.posts.length,2);assert.deepEqual(content.interests,['摇滚','吉他','旅行']);
+ assert.equal(content.music[0].artist,'Guns N’ Roses');assert.equal(content.seed,123);
+ const spec=createPreset('nebula');spec.orbits.type='dust';
+ assert.equal(spec.mascot.enabled,true);
+ const invalid={...spec,mascot:{...spec.mascot,accessory:'arbitrary-3d-model'}};
+ assert.throws(()=>validateRenderSpec(invalid));
 });

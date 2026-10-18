@@ -1,0 +1,23 @@
+{
+  "capturedAt": "2026-10-18T09:47:02.523Z",
+  "case": "real AI output plus UI-enabled cloud and dust layers",
+  "stats": {
+    "fps": 60,
+    "triangles": 79536,
+    "drawCalls": 6,
+    "vertices": 46076,
+    "renderer": "WebGL 2",
+    "frameMs": 0.4
+  },
+  "canvas": {
+    "bottom": 570,
+    "height": 496,
+    "left": 320,
+    "right": 879,
+    "top": 74,
+    "width": 559,
+    "x": 320,
+    "y": 74
+  },
+  "note": "Short local sample only; frameMs is CPU submission time, not GPU completion. Previous three-preset values are historical."
+}

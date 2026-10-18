@@ -40,6 +40,9 @@ export async function compile(raw:unknown){
    const family={nebula:'flowing',fracture:'tectonic',crystal:'faceted'}[output.data.renderSpec.style];
    if(output.data.renderSpec.geometry.type!==family)throw new Error('Style and geometry family must agree.');
    if(!output.data.renderSpec.geometry.enabled)throw new Error('Primary geometry must be enabled.');
+   if(!output.data.renderSpec.mascot.enabled)throw new Error('Primary geometry requires the milkfrog mascot.');
+   const landmarks=renderSpec.landmarks,knownEvidence=new Set([...dna.themes,...dna.contrasts].flatMap(t=>t.evidenceIds));
+   if(new Set(landmarks.map(l=>l.id)).size!==landmarks.length||landmarks.filter(l=>l.placement==='companion').length>3||landmarks.some(l=>l.evidenceIds.some(id=>!knownEvidence.has(id))))throw new Error('Invalid landmark IDs, placement count or evidence.');
    return {...output.data,renderSpec,degraded:false,meta:output.meta};
   }catch(e){if(!(e instanceof Error)||!(/ZodError|RenderSpec/.test(e.name)||/seed|direction|family|geometry|Invalid|Palette|Colors/.test(e.message)))throw e;validationError='Output failed schema or semantic validation. Preserve seed, valid direction, enabled geometry, supported types and numeric ranges.';}
  }

@@ -2,6 +2,8 @@
 
 Source adaptations are described in docs/IMPLEMENTATION_REPORT.md and docs/PRODUCT_ARCHITECTURE.md. Reference-only licenses are retained for provenance. The cloud atmosphere now also directly adapts Greenheck's scripts/atmosphere.js and atmosphere shaders, and includes its public/cloud.png as public/textures/greenheck-cloud.png under the repository's MIT license. No third-party 3D models, skyboxes or photos are included.
 
+`public/mascot/milkfrog.png` is the user-supplied mascot artwork, included at the user's request. It is not attributed to Greenheck or Three.js. Accessory overlays are drawn locally by this application; no external band logos are included.
+
 ## dgreenheck-threejs-procedural-planets
 Inspected commit: 23457d4f8e6bedf22aa266e12c92f850822ff3a4
 

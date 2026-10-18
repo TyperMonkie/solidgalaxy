@@ -1,5 +1,11 @@
 # Architecture B 实现与实际结果
 
+## 比赛演示版更新（2026-10-18）
+
+当前主流程已变为分类素材面板、两阶段真实 AI 解读、个人标签、动态星球、用户提供的 2.5D 奶蛙，以及分布式可点击世界符号。原三预设仅作内部几何模块。云层现已直接采用 Greenheck Atmosphere 的球壳云精灵、原始 cloud.png、simplex 密度与受光方法；星带改为透明细丝带，并支持稀疏点状轨道。下文部分三预设截图与旧云壳描述是早期记录，以本更新及 PRODUCT_ARCHITECTURE.md 为准。
+
+当前版本通过 TypeScript / Vite 构建与 9 项测试，包括素材分类保留、两阶段调用隔离、非法模块拒绝、符号确定性与最小间距。没有按用户最新要求扩展手机版检查。真正图像生成尚未接入，奶蛙采用保留原图的服饰/配件组合，不将其宣称为新模型或生图结果。
+
 ## 工作区与技术栈
 
 初始 `D:\dotless` 为空，也不是 Git 仓库，没有现成渲染依赖或 Architecture A。应用创建于独立 `architecture-b` 目录。没有覆盖用户已有实现；没有使用 Genesis 的地形或着色器。
@@ -12,7 +18,7 @@
 
 | 仓库 | 实际阅读的文件 | 最终用途 |
 |---|---|---|
-| dgreenheck/threejs-procedural-planets | index.html 中地形/顶点/片元 shader；scripts/main.js、atmosphere.js | **直接移植** simplex3/fractal3/terrainHeight；改造 GPU 位移、高度混色与有限差分法线。未采用其粒子大气或素材 |
+| dgreenheck/threejs-procedural-planets | index.html 中地形/顶点/片元 shader；scripts/main.js、atmosphere.js、public/cloud.png | **直接移植** simplex3/fractal3/terrainHeight；改造 GPU 位移、高度混色与有限差分法线；现亦采用其云精灵大气实现与原始云贴图 |
 | ashima/webgl-noise | src/noise3D.glsl 与许可证 | 保留原始 3D simplex 实现用于可选云壳；Greenheck 地形本身也包含 Ashima 的 simplex 算法 |
 | Eluvade/cosmos | src/seed.ts、glsl/features/flow-layer.glsl.ts、glsl/composer.ts、standalone/gas-giant.glsl.ts | **改造 hashSeed 整数混合代码**生成可重现的独立子种子；参考模块化和流动层设计。没有将其 2D canvas 输出冒充 3D 星球 |
 | XenoverseUp/procedural-planets | glsl/compute/vertex-compute.fs、glsl/planet/planet.fs、components/planet-cpu/mesh-generation.ts、editor/lights.tsx | 检查 GPU/CPU 生成、多层与 ridged noise；作为技术参考，最终没有搬入其 GPGPU 管线 |

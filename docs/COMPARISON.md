@@ -1,5 +1,7 @@
 # A/B 截图与评价方法
 
+> 历史记录：下文的三预设对比方法对应早期渲染器实验。当前比赛产品已改为分类素材 → DNA → 个性星球 / 奶蛙 / 世界符号，首页不再接受 preset/compare 作为对比模式。以下旧截图不能当作当前 UI；最新截图为 `screenshots/submission-world.jpg`。Architecture A 仍未提供。
+
 当前工作区没有 Architecture A，不能伪造 A 版截图，也不能把 Greenheck 参考演示当作 Architecture A。因此本次只捕获了 B 版三种预设；尚不能给出胜负结论。
 
 固定对比 URL：

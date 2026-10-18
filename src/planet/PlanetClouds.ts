@@ -23,7 +23,7 @@ export function createClouds(s:RenderSpec){
     fragmentShader:noise+`
       uniform float uTime;uniform vec3 uColor;uniform sampler2D pointTexture;varying vec3 fragPosition;
       void main(){vec3 R=normalize(fragPosition);vec3 L=normalize(vec3(-2.8,3.5,3.8));float light=max(.05,dot(R,L));
-      float n=simplex3(vec3(uTime*.03)+fragPosition/.4);float alpha=.35*clamp(n,0.,1.);
+      float n=simplex3(vec3(uTime*.03)+fragPosition/.4);float alpha=.26*clamp(n,0.,1.);
       gl_FragColor=vec4(light*uColor,alpha)*texture2D(pointTexture,gl_PointCoord);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>

@@ -1,4 +1,6 @@
 export type Style = 'nebula' | 'fracture' | 'crystal';
+export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;}
+export interface LandmarkSpec {id:string;icon:'music'|'guitar'|'headphones'|'camera'|'compass'|'mountain'|'book'|'gamepad'|'lightning'|'heart'|'moon'|'chat'|'star'|'wave'|'flower';label:string;meaning:string;color:string;placement:'companion'|'surface';evidenceIds:string[];}
 export interface RenderSpec {
   version: 1;
   style: Style;
@@ -12,6 +14,8 @@ export interface RenderSpec {
   animation: { enabled: boolean; rotation: number; flow: number };
   modules: { stars: boolean; clouds: boolean; postFX: boolean };
   quality: 'low' | 'balanced' | 'high';
+  mascot:MascotSpec;
+  landmarks:LandmarkSpec[];
 }
 const record = (v: unknown): Record<string, unknown> => {
   if (v === null || typeof v !== 'object' || Array.isArray(v)) throw new Error('RenderSpec requires objects.');

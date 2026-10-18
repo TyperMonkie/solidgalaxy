@@ -1,0 +1,390 @@
+{
+  "renderSpec": {
+    "version": 1,
+    "style": "fracture",
+    "seed": 3025128687,
+    "geometry": {
+      "enabled": true,
+      "type": "tectonic",
+      "complexity": 0.72,
+      "displacement": 0.2
+    },
+    "material": {
+      "palette": [
+        "#171C24",
+        "#75695E",
+        "#F2B56E"
+      ],
+      "roughness": 0.81,
+      "metalness": 0.17,
+      "emission": 0.27
+    },
+    "atmosphere": {
+      "enabled": true,
+      "color": "#D9A36C",
+      "strength": 0.14
+    },
+    "orbits": {
+      "enabled": true,
+      "type": "ribbons",
+      "tilt": -0.31
+    },
+    "structures": {
+      "enabled": true,
+      "count": 4
+    },
+    "lighting": {
+      "enabled": true,
+      "intensity": 1.35,
+      "ambient": 0.11
+    },
+    "animation": {
+      "enabled": true,
+      "rotation": 0.043,
+      "flow": 0.34
+    },
+    "modules": {
+      "stars": false,
+      "clouds": false,
+      "postFX": true
+    },
+    "quality": "balanced",
+    "mascot": {
+      "enabled": true,
+      "outfit": "tour",
+      "accessory": "guitar",
+      "accent": "#FFD18A",
+      "label": "Queen",
+      "meaning": "金色奶蛙沿用原画姿态，穿深色巡演装并只带一把吉他；暖色名牌以纯文本写下所列的 Queen，作为音乐线索，而非官方标志或粉丝身份声明。"
+    },
+    "landmarks": [
+      {
+        "id": "live-spark",
+        "icon": "lightning",
+        "label": "恰时亮",
+        "meaning": "以一道小亮痕联想平时寡言、到现场才热闹的能量起落，不表示真实的演出经历。",
+        "color": "#FFD38B",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "own-way",
+        "icon": "compass",
+        "label": "自己看",
+        "meaning": "指向亲自去看未知风景的愿望，不预设目的地。",
+        "color": "#BCE4D8",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ]
+      },
+      {
+        "id": "open-seat",
+        "icon": "heart",
+        "label": "留个座",
+        "meaning": "把照顾朋友理解为为同行的人保留空间，而非推断具体关系。",
+        "color": "#F4B9A0",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "passing-wind",
+        "icon": "wave",
+        "label": "风经过",
+        "meaning": "以流动的形状抽象表达自由探路，并非另一项具体爱好。",
+        "color": "#A9D5EF",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:1",
+          "interests:2"
+        ]
+      },
+      {
+        "id": "warm-echo",
+        "icon": "music",
+        "label": "远处响",
+        "meaning": "让音乐与现场热度只在远处留下回应，避免让整颗星球变得拥挤。",
+        "color": "#FFE0A3",
+        "placement": "companion",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0",
+          "interests:1"
+        ]
+      },
+      {
+        "id": "small-lamp",
+        "icon": "star",
+        "label": "小灯亮",
+        "meaning": "借一枚亮点抽象表示独行时仍愿为朋友留灯；不是球面上的真实灯具。",
+        "color": "#F3CD9D",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1"
+        ]
+      },
+      {
+        "id": "far-marker",
+        "icon": "mountain",
+        "label": "未见处",
+        "meaning": "把遥远路标当作尚待亲自探索的方向，不暗示已去过某地。",
+        "color": "#C6D9B0",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ]
+      }
+    ]
+  },
+  "directionId": "d1",
+  "interpretation": "大片暗色岩面缓缓转向光里，远处的暖纹才显出一点现场般的热度。细弧通向另一面，小灯意象与分散的路标为独行和同行都留着位置；奶蛙轻装相伴。",
+  "decisions": [
+    {
+      "intent": "让「静时留白」先被看见，再让「现场点火」从地表局部浮现，而不是把热度铺满星球。",
+      "module": "geometry",
+      "implementation": "以深色、粗哑的起伏岩面承托少量暖色沟纹，降低整体发光，保留宽阔暗面和清晰的明暗交界。"
+    },
+    {
+      "intent": "把「静处点火」的两种状态放在同一片地表上，不靠整颗球发光制造热闹。",
+      "module": "material",
+      "implementation": "使用深炭色、暖灰色和克制的琥珀色；低金属感使岩面保持沉静，亮色只强调沟纹与边缘。"
+    },
+    {
+      "intent": "为「热闹留席」留下可呼吸的暗处，让远方的光与小路标有空间显现。",
+      "module": "atmosphere",
+      "implementation": "保留轻微暖色大气边缘，不开启云层和背景星点。"
+    },
+    {
+      "intent": "回应「循风自往」与「照顾同行」：路向外延伸，却不把球面或空位围满。",
+      "module": "orbits",
+      "implementation": "以透明、渐隐的细弧环绕球体，形成通向背面的开放轮廓。"
+    },
+    {
+      "intent": "让「平时安静、到了现场热闹」表现为观看中的渐次发现，而非持续闪烁的舞台。",
+      "module": "animation",
+      "implementation": "缓慢自转并施加温和的全局光纹流动；路标随球面转动依次进入视野。"
+    },
+    {
+      "intent": "将所列音乐线索化作轻装同行的俏皮细节，不据此推断粉丝身份。",
+      "module": "structures",
+      "implementation": "奶蛙保留原有形象与姿态，穿巡演装、携一把吉他，名牌仅写纯文本「Queen」；兴趣集中在随行者身上。"
+    }
+  ],
+  "fallbacks": [
+    {
+      "requested": "远处光纹偶尔成段亮起，局部短暂聚拢后散开",
+      "substitute": "低强度沟纹发光、温和全局流动，以及自转带来的渐次可见",
+      "reason": "渲染器仅提供全局流动与沿沟纹的发光，不能指定某块地表在特定时刻独立亮起。"
+    },
+    {
+      "requested": "一颗小光点以不匀速的独立轨道绕行",
+      "substitute": "缓慢进动的开放式透明细弧",
+      "reason": "轨道装饰不能控制单颗光点的不匀速独立绕行。"
+    },
+    {
+      "requested": "薄雾顺着纹路飘移",
+      "substitute": "轻微暖色大气边缘",
+      "reason": "云层是蓬松的贴图云精灵，不能沿指定纹路形成纤细薄雾；为保留留白而不启用。"
+    },
+    {
+      "requested": "奶蛙只背一枚小吉他拨片",
+      "substitute": "保留原画姿态，使用唯一的吉他配饰",
+      "reason": "配饰目录没有拨片，固定奶蛙画作也不支持修改原有姿态。"
+    }
+  ],
+  "degraded": false,
+  "meta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_0e79a13bddcfb91d016ad49485e9488191a8f53fd4eaa4bb24",
+    "usage": {
+      "input_tokens": 5446,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 2254,
+      "output_tokens_details": {
+        "reasoning_tokens": 244
+      },
+      "total_tokens": 7700,
+      "attribution": {
+        "items": {
+          "msg_0e79a13bddcfb91d016ad49485e97081919d80c9285cc654af": {
+            "input_tokens": 3468,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 3468,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_0e79a13bddcfb91d016ad4948bf5ec8191a94922ef5770f1e0": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 2010,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 2010
+              }
+            ]
+          },
+          "rs_0e79a13bddcfb91d016ad4948bc2f08191a978760dc04847a1": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 244
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 1287,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 689,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "dna": {
+    "version": 1,
+    "seed": 3025128687,
+    "title": "风经过，灯还亮着",
+    "vision": "这是一颗懂得把音量留给恰当时刻的星球。平时，宽阔的暗色地表在风里缓缓转动，路标隔着很远才露一次面；当光纹越过地平线，局部便像现场被点亮，却不吞没周围的宁静。一盏小灯守着空位，几道细弧延向尚未看见的另一面。金色圆肚子的奶蛙轻装同行，把具体喜好带在身上；星球本身则容纳更大的问题：如何走得自由，又让同行的人感到有位置。",
+    "emotionalAtmosphere": "开阔、微热而不喧哗；独行的兴致里，有一盏留给朋友的灯。",
+    "themes": [
+      {
+        "name": "静处点火",
+        "interpretation": "示例文字自述平时话不多、到了现场会热闹；这里读作能量有自己的出场时机，而不是始终高声。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "循风自往",
+        "interpretation": "喜欢自由、旅行，并写到要自己去看风抵达之处；开阔感更像亲自探路，而非漫无目的地漂流。",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "热闹留席",
+        "interpretation": "希望世界有摇滚能量却不过度拥挤，也提到照顾朋友；热烈与体贴在这里共享同一片留白。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0",
+          "interests:1"
+        ],
+        "confidence": "supported"
+      }
+    ],
+    "contrasts": [
+      {
+        "between": [
+          "静时留白",
+          "现场点火"
+        ],
+        "relationship": "示例文字把平时的寡言与现场的热闹并置；世界可以缓缓自转，却在局部出现短暂、明亮的脉动。",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "between": [
+          "自由探路",
+          "照顾同行"
+        ],
+        "relationship": "向未知处走，并不等于切断联系；开放的远方与为朋友保留的位置可以同时存在。",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ]
+      }
+    ],
+    "motifs": [
+      {
+        "description": "保留金色、圆肚子的奶蛙吉祥物形象，穿简洁的巡演短外套，只背一枚小吉他拨片；短名牌写“Queen”，不改变原有可辨识的外形。",
+        "meaning": "由摇滚、吉他兴趣及所列 Queen 曲目引出的俏皮随行者；名牌仅是音乐线索，不推定粉丝身份。"
+      },
+      {
+        "description": "球面背风侧藏一条时隐时现的风径。",
+        "meaning": "呼应‘自己去看’的主动探索，而不是一条规定好的路线。"
+      },
+      {
+        "description": "远离吉祥物的一小块开阔地，光纹在此短暂聚拢，随即散开。",
+        "meaning": "把示例中‘一到现场就热闹’转成有起落的能量，同时尊重‘别太拥挤’。"
+      },
+      {
+        "description": "另一侧地平线埋着一道细如琴弦的弧形纹理。",
+        "meaning": "让吉他兴趣成为星球自身的质感，不把乐器反复堆成摆件。"
+      },
+      {
+        "description": "靠近球面边缘的一盏小灯，旁边保留一处未被占满的暗位。",
+        "meaning": "将‘认真照顾朋友’译成有空间感的照应，而非对关系作更多推断。"
+      },
+      {
+        "description": "背面散落两枚不相连的微小路标，只在自转时依次可见。",
+        "meaning": "旅行兴趣与自由意象相遇：目的地可以不预先公布。"
+      },
+      {
+        "description": "远处光带上出现两次不同的短促闪烁，一次宽亮，一次细长；不形成文字或歌词。",
+        "meaning": "借《We Will Rock You》与《Sweet Child O’ Mine》这两条所列曲目的标题作开放的视觉联想，不推断音色、节奏或歌词内容。"
+      }
+    ],
+    "directions": [
+      {
+        "id": "d1",
+        "name": "留白的安可",
+        "vision": "把现场的热度留在地平线，而不是铺满整颗星球；观看时先感到开阔，随后才发现藏在远处的回应。",
+        "composition": "宽阔的暗色球面占据画面下方，细长的暖光纹路从一侧越过地平线；少量小符号分散在正面与背面，留出大片安静空间。光像远处现场映来的余辉，表面有哑光岩层与细微金属纹。",
+        "motion": "星球缓慢转动，光纹偶尔成段亮起；薄雾顺着纹路飘移，一颗小光点以不匀速的独立轨道绕行，像有人出发，也有人在等。"
+      },
+      {
+        "id": "d2",
+        "name": "风的空座",
+        "vision": "从‘风吹到哪里，自己去看’出发，把自由想成一段仍为同行者留有空位的路。",
+        "composition": "以一条弯曲的旅途边界切分球面：一侧是柔和、透光的雾原，另一侧是有节制的深色纹理。低角度光照出边界上的细小标记，不设置宏大的舞台。",
+        "motion": "星球匀速缓转，雾层比地表稍快；几个距离不同的标记各按自己的节奏绕行，偶尔靠近却不排成队。"
+      },
+      {
+        "id": "d3",
+        "name": "夜行驿站",
+        "vision": "让摇滚的能量不是喧闹的装饰，而是深夜仍亮着的灯：可以动身，也可以照应来客。",
+        "composition": "意外地将整个星球处理成一座疏朗的夜间驿站：球面是温润的旧纸与磨砂玻璃质感，光从稀疏的窗口透出；吉他般的弧线只作为远景轮廓，不成为巨型道具。",
+        "motion": "驿站般的球体极慢旋转，几缕薄雾像过路的风；外围两点微光一近一远地运行，短暂交会后继续各自的旅程。"
+      }
+    ],
+    "selectedDirectionId": "d1",
+    "intensity": 0.64,
+    "uncertainty": "材料包含标明为‘虚构示例’的文字，音乐也只有标题与艺人信息；无法由此确认真实经历、听歌感受或关系细节。这只是依据不完整片段提出的一种可修改的创意解读，并非对真实性格的揭示。"
+  }
+}

@@ -15,6 +15,8 @@ export function createPreset(style: Style, seed = 78291): RenderSpec {
     lighting: { enabled: true, intensity: 1.4, ambient: 0.12 },
     animation: { enabled: true, rotation: 0.035, flow: 0.18 },
     modules: { stars: false, clouds: false, postFX: true },
+    mascot:{enabled:true,outfit:'classic',accessory:'none',accent:'#b7a6ef',label:'',meaning:'这只奶蛙还在等待你的故事。生成后，AI 会把你的偏爱组合成它的装扮与随身物件。'},
+    landmarks:[],
   };
   if (style === 'fracture') {
     common.geometry = { enabled: true, type: 'tectonic', complexity: 0.8, displacement: 0.3 };

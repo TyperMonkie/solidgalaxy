@@ -14,11 +14,13 @@ export const DNASchema=z.strictObject({
   emotionalAtmosphere:text,
   themes:z.array(z.strictObject({name:text,interpretation:text,evidenceIds:evidence,confidence:z.enum(['tentative','supported'])})).min(1).max(7),
   contrasts:z.array(z.strictObject({between:z.array(text).length(2),relationship:text,evidenceIds:evidence})).max(5),
-  motifs:z.array(z.strictObject({description:text,meaning:text})).max(6),
+  motifs:z.array(z.strictObject({description:text,meaning:text})).max(10),
   directions:z.array(z.strictObject({id:text,name:text,vision:text,composition:text,motion:text})).min(2).max(3),
   selectedDirectionId:text,intensity:unit,uncertainty:text,
 });
 export type UniverseDNA=z.infer<typeof DNASchema>;
+export const MascotSchema=z.strictObject({enabled:z.boolean(),outfit:z.enum(['classic','tour','explorer','dreamer']),accessory:z.enum(['none','guitar','headphones','camera','book','gamepad']),accent:color,label:z.string().max(48),meaning:z.string().min(1).max(800)});
+export const LandmarkSchema=z.strictObject({id:z.string().min(1).max(32),icon:z.enum(['music','guitar','headphones','camera','compass','mountain','book','gamepad','lightning','heart','moon','chat','star','wave','flower']),label:z.string().min(1).max(20),meaning:z.string().min(1).max(600),color,placement:z.enum(['companion','surface']),evidenceIds:evidence});
 export const RenderSpecSchema=z.strictObject({
  version:z.literal(1),style:z.enum(['nebula','fracture','crystal']),seed:z.number().int().min(0).max(4294967295),
  geometry:z.strictObject({enabled:z.boolean(),type:z.enum(['flowing','tectonic','faceted']),complexity:unit,displacement:z.number().min(0).max(.4)}),
@@ -28,7 +30,7 @@ export const RenderSpecSchema=z.strictObject({
  structures:z.strictObject({enabled:z.boolean(),count:z.number().int().min(0).max(64)}),
  lighting:z.strictObject({enabled:z.boolean(),intensity:z.number().min(0).max(3),ambient:unit}),
  animation:z.strictObject({enabled:z.boolean(),rotation:z.number().min(0).max(.2),flow:unit}),
- modules:z.strictObject({stars:z.boolean(),clouds:z.boolean(),postFX:z.boolean()}),quality:z.enum(['low','balanced','high']),
+ modules:z.strictObject({stars:z.boolean(),clouds:z.boolean(),postFX:z.boolean()}),quality:z.enum(['low','balanced','high']),mascot:MascotSchema,landmarks:z.array(LandmarkSchema).max(10),
 });
 export const CompilationSchema=z.strictObject({
  renderSpec:RenderSpecSchema,directionId:text,interpretation:text,

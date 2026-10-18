@@ -1,0 +1,281 @@
+{
+  "renderSpec": {
+    "version": 1,
+    "style": "nebula",
+    "seed": 427426411,
+    "geometry": {
+      "enabled": true,
+      "type": "flowing",
+      "complexity": 0.58,
+      "displacement": 0.12
+    },
+    "material": {
+      "palette": [
+        "#101C30",
+        "#786C60",
+        "#F2B774"
+      ],
+      "roughness": 0.79,
+      "metalness": 0.16,
+      "emission": 0.12
+    },
+    "atmosphere": {
+      "enabled": true,
+      "color": "#D6AB96",
+      "strength": 0.18
+    },
+    "orbits": {
+      "enabled": true,
+      "type": "ribbons",
+      "tilt": -0.32
+    },
+    "structures": {
+      "enabled": false,
+      "count": 0
+    },
+    "lighting": {
+      "enabled": true,
+      "intensity": 1.4,
+      "ambient": 0.11
+    },
+    "animation": {
+      "enabled": true,
+      "rotation": 0.046,
+      "flow": 0.34
+    },
+    "modules": {
+      "stars": false,
+      "clouds": true,
+      "postFX": false
+    },
+    "quality": "balanced",
+    "mascot": {
+      "enabled": true,
+      "outfit": "tour",
+      "accessory": "guitar",
+      "accent": "#C7D9EC",
+      "label": "Queen",
+      "meaning": "穿巡演上衣的奶蛙带着一把吉他，像散场后仍愿同行的小伙伴；「Queen」仅作为所给艺名的文字铭牌，浅蓝饰边让它在暖色地表前清晰可见。"
+    }
+  },
+  "directionId": "d2",
+  "interpretation": "暖色地表留出一处仿佛能坐下的地方，深蓝夜色向远方展开。星球缓缓转动，薄雾与疏朗弧线轻轻经过：这里可以相聚，也可以独自出发。",
+  "decisions": [
+    {
+      "intent": "把「为友留席」与「向外探索」放在同一颗星球上，而不把空地做成拥挤的舞台。",
+      "module": "geometry",
+      "implementation": "以连绵、低起伏的地表和暖色渐层暗示可停留的空地，外围转入宽阔的深色区域；不添加岩块，让留白保持完整。"
+    },
+    {
+      "intent": "让「有空隙的热烈」有现场余温，也让远处的夜色足够安静。",
+      "module": "material",
+      "implementation": "用深夜蓝、磨旧的暖灰铜色和少量琥珀亮色形成明暗分界；保持高粗糙度与低发光。"
+    },
+    {
+      "intent": "以柔软空气衬托可落脚的地面，回应「循风自探」的开阔感。",
+      "module": "atmosphere",
+      "implementation": "启用较轻的云雾与柔和大气边缘，避免遮住地表或填满背景。"
+    },
+    {
+      "intent": "让「静时少言」与「现场热闹」像远处的回声一样并存，而不是把音乐符号铺满星球。",
+      "module": "orbits",
+      "implementation": "采用倾斜的透明开放丝带弧线，保留弧线之间的大块空域。"
+    },
+    {
+      "intent": "地表随转动轮流面向观众，漂移的弧线则给「向外探索」留出从容的节奏。",
+      "module": "animation",
+      "implementation": "以每秒 0.046 弧度平稳自转，并让雾与轨道保持轻缓流动。"
+    },
+    {
+      "intent": "把具体的音乐线索集中在同行的小伙伴身上，不让它挤占留给朋友和远方的空间。",
+      "module": "structures",
+      "implementation": "奶蛙穿巡演上衣、只带一把吉他，铭牌使用所给艺名「Queen」。"
+    }
+  ],
+  "fallbacks": [
+    {
+      "requested": "一处小小的明亮空地，光随自转时隐时现",
+      "substitute": "用平缓地形、暖色层次和定向照明暗示可停留的亮处，随星球自转呈现不同明暗",
+      "reason": "现有地表与灯光参数不能指定一块边界明确、始终发亮的局部空地。"
+    },
+    {
+      "requested": "一条独自绕行的轻薄气流",
+      "substitute": "使用留有间距的透明丝带弧线与独立缓慢漂移的云雾",
+      "reason": "开放丝带轨道固定由多条弧线构成，云雾也不能被指定沿单一路径绕行。"
+    },
+    {
+      "requested": "布料般的岩面与轻便巡演夹克",
+      "substitute": "以柔和起伏、高粗糙度表面表现温润触感；奶蛙使用现有巡演上衣",
+      "reason": "现有材质不能呈现指定的布料纹理，巡演装也没有夹克款式。"
+    }
+  ],
+  "degraded": false,
+  "meta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_093a7bab4183a12f016ad4929ca7148191bd510eb490a6121d",
+    "usage": {
+      "input_tokens": 4561,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 1651,
+      "output_tokens_details": {
+        "reasoning_tokens": 347
+      },
+      "total_tokens": 6212,
+      "attribution": {
+        "items": {
+          "msg_093a7bab4183a12f016ad4929ca7448191a63d55deeb675d10": {
+            "input_tokens": 2884,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 2884,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_093a7bab4183a12f016ad492a54900819188c092370e8c6d5c": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 1304,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 1304
+              }
+            ]
+          },
+          "rs_093a7bab4183a12f016ad492a5068c8191bbf1dc93d6849002": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 347
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 1108,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 567,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "dna": {
+    "version": 1,
+    "seed": 427426411,
+    "title": "风里有一席",
+    "vision": "这颗星球像一场散场后仍亮着灯的小型演出：中央留一处温暖空地，远处的夜色则宽阔得可以独自走进去。它慢慢旋转，让空地时而可见；一缕薄雾沿自己的轨道向外漂，仿佛风替旅途开路，却从不催人跟上。回声只在边缘轻轻起伏，不挤占天空。热闹在这里不是填满一切，而是有人可以靠近，也有人可以自在地出发。",
+    "emotionalAtmosphere": "有现场般的暖意和冲劲，也有足够呼吸、独自望向远方的安静。",
+    "themes": [
+      {
+        "name": "有空隙的热烈",
+        "interpretation": "示例中的自述把平时少言与现场热闹放在一起，还希望世界有摇滚能量、却不拥挤。这份热烈需要空间，而不是持续喧闹。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "循风自探",
+        "interpretation": "喜欢自由，也写下想自己去看风会吹到哪里；旅行让这种不等答案、亲自出发的姿态更鲜明。",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "为友留席",
+        "interpretation": "示例自述提到会认真照顾朋友。这让自由不必等于疏离：世界可以向外敞开，也为同行者留一处落脚点。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      }
+    ],
+    "contrasts": [
+      {
+        "between": [
+          "静时少言",
+          "现场热闹"
+        ],
+        "relationship": "安静与热烈不是互相抵消，而是随场合切换的两种节奏。",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "between": [
+          "向外探索",
+          "为朋友留位置"
+        ],
+        "relationship": "想自由地走，也愿意认真照顾同行的人。",
+        "evidenceIds": [
+          "posts:0",
+          "posts:1",
+          "interests:2"
+        ]
+      }
+    ],
+    "motifs": [
+      {
+        "description": "宽阔的回声弧线",
+        "meaning": "对应摇滚的能量，以及“热闹但别太拥挤”的愿望。"
+      },
+      {
+        "description": "空地与一条向外延伸的气流",
+        "meaning": "空地为朋友留位置；气流让自由与旅行不必预设终点。"
+      },
+      {
+        "description": "保留原有金色圆肚皮造型的奶蛙，穿一件轻便巡演夹克，只配一把小吉他；短铭牌写“Queen”。",
+        "meaning": "让具体的音乐与吉他线索留在俏皮的伙伴身上，不把整颗星球塞满个人物件；铭牌仅引用所给艺名，不推断粉丝身份。"
+      }
+    ],
+    "directions": [
+      {
+        "id": "d1",
+        "name": "旷野回声",
+        "vision": "把现场的能量化为能传得很远、却不占满空间的回响。",
+        "composition": "一颗尺度开阔的暗金色行星，表面只有几道宽阔的弧形声纹；远处留出大片空域。暖光从地平线下透出，材质像磨旧的金属与细沙。",
+        "motion": "行星缓慢自转，声纹偶尔向外扩散；稀薄雾层顺着弧线漂移，不把画面填满。"
+      },
+      {
+        "id": "d2",
+        "name": "留席的星",
+        "vision": "用一处不拥挤的聚会空间，把现场的热闹、独自探路的自由和对朋友的照顾放在一起。",
+        "composition": "行星表面围出一处小小的明亮空地，外侧是辽阔、偏冷的夜色；柔和的光从空地溢出，岩面带有布料般的温润纹理。",
+        "motion": "主体平稳转动，空地的光随之时隐时现；一条轻薄气流独自绕行，像外出的路，也像回来的路。"
+      },
+      {
+        "id": "d3",
+        "name": "风的拨片",
+        "vision": "从吉他与旅行之间找到意外的共同点：一次拨动之后，方向仍交给风。",
+        "composition": "从远处看是一颗被风切出宽阔路径的行星；近处可见稀疏的琴弦状地貌。侧光清亮，表层像纸与矿石交叠，而非堆满乐器。",
+        "motion": "星体转得稍快，路径上的薄雾却缓缓逆向移动；两种速度保持间距，让出发感与从容感并存。"
+      }
+    ],
+    "selectedDirectionId": "d2",
+    "intensity": 0.7,
+    "uncertainty": "材料包含标为“虚构示例”的自述，音乐只提供曲名与艺名；无法据此判断实际经历、听歌感受或稳定性格。这是基于有限片段、可随本人修正的一种创意解读，并非真实人格的揭示。"
+  }
+}
