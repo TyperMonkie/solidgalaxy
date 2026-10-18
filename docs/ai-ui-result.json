@@ -1,0 +1,326 @@
+{
+  "synthetic": true,
+  "dna": {
+    "version": 1,
+    "seed": 1573849105,
+    "title": "夜城的错拍图纸",
+    "vision": "一张夜间的城市图纸缓缓展开：笔直线条划出建筑的边界，未被填满的暗处留给安静。细小光点沿线前行，却偶尔跳过预期的节点；它们既像远处的窗灯，也像尚未写定的拍点。这里的城市不需要随音乐起舞，建筑也不必纹丝不动。两者共享同一片留白，让规整的尺度与不规则的间隔互相照亮，形成一处可以驻足、也可以继续漫步的夜景。",
+    "emotionalAtmosphere": "低声、开阔，带一点不规则闪动的清醒感。",
+    "themes": [
+      {
+        "name": "夜城中的留白",
+        "interpretation": "夜间观看城市建筑与对安静、独处的偏好并列，使建筑不只是景物，也成为容纳留白的尺度。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0",
+          "interests:1"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "秩序里的错拍",
+        "interpretation": "不规则的电子节奏为安静的建筑意象带来局部变化，而非把整座城市变成喧闹场景。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:2"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "可以行走的谱面",
+        "interpretation": "建筑线条与节奏都可被读作间隔和路径；将图纸视作谱纸是一种视觉联想，并非实际习惯。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0",
+          "interests:2"
+        ],
+        "confidence": "tentative"
+      }
+    ],
+    "contrasts": [
+      {
+        "between": [
+          "夜间建筑的稳定轮廓",
+          "电子音乐的不规则节奏"
+        ],
+        "relationship": "城市的秩序成为节奏偏移时仍可辨认的参照。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:0",
+          "interests:2"
+        ]
+      },
+      {
+        "between": [
+          "独处的安静",
+          "持续变化的声光"
+        ],
+        "relationship": "变化不必打破宁静，也可以让宁静显出层次。",
+        "evidenceIds": [
+          "posts:0",
+          "interests:1",
+          "interests:2"
+        ]
+      }
+    ],
+    "motifs": [
+      {
+        "description": "错位亮起的窗格",
+        "meaning": "稳定结构中容纳未被校准的节奏。"
+      },
+      {
+        "description": "大片未填满的夜色",
+        "meaning": "让安静成为空间，而不是缺少内容。"
+      },
+      {
+        "description": "分叉的建筑线条",
+        "meaning": "从规划走向开放的可能性。"
+      }
+    ],
+    "directions": [
+      {
+        "id": "night",
+        "name": "错拍的夜楼",
+        "vision": "让建筑保持沉静，让节奏只在局部窗光里显形。",
+        "composition": "以一座尺度巨大的夜间建筑为主体，大片深色天空留白；冷色窗光落在石材与玻璃上，少数灯格错开亮起，像不规则的停顿。",
+        "motion": "视线沿建筑边缘缓慢上移，灯光偶尔跳过一格再继续。"
+      },
+      {
+        "id": "score",
+        "name": "可漫步的谱纸",
+        "vision": "把建筑图纸想象成可供光点行走的节奏路径，而不是已完成的楼宇。",
+        "composition": "俯视一张铺满画面的建筑平面图；细密墨线、半透明描图纸与微弱蓝光构成微观城市，线条在一处意外地分叉。",
+        "motion": "光点沿图纸线条行进，却不按等距节点停留，仿佛图纸也能容纳即兴。"
+      },
+      {
+        "id": "pause",
+        "name": "留给停顿的广场",
+        "vision": "以空处而非建筑本身为中心，突出夜城的尺度与独处时可感到的余地。",
+        "composition": "远景是一片低矮城市剪影，近景只有一处明亮的空平台；粗糙混凝土与薄雾承接稀疏的暖色反光。",
+        "motion": "雾缓缓越过平台，远处的光以不均匀的间隔回应，平台始终空着。"
+      }
+    ],
+    "selectedDirectionId": "score",
+    "intensity": 0.48,
+    "uncertainty": "资料明确标为用于测试的虚构片段；没有图像或音乐音频可供观察。图纸与谱纸的联系是基于有限线索的一种创作解读，并非对真实人格或经历的揭示。"
+  },
+  "renderSpec": {
+    "version": 1,
+    "style": "crystal",
+    "seed": 1573849105,
+    "geometry": {
+      "enabled": true,
+      "type": "faceted",
+      "complexity": 0.68,
+      "displacement": 0.09
+    },
+    "material": {
+      "palette": [
+        "#0c1724",
+        "#536b78",
+        "#abd1c9"
+      ],
+      "roughness": 0.35,
+      "metalness": 0.48,
+      "emission": 0.11
+    },
+    "atmosphere": {
+      "enabled": true,
+      "color": "#527a89",
+      "strength": 0.14
+    },
+    "orbits": {
+      "enabled": true,
+      "type": "angular",
+      "tilt": 0.28
+    },
+    "structures": {
+      "enabled": true,
+      "count": 16
+    },
+    "lighting": {
+      "enabled": true,
+      "intensity": 1.35,
+      "ambient": 0.1
+    },
+    "animation": {
+      "enabled": true,
+      "rotation": 0.018,
+      "flow": 0.07
+    },
+    "modules": {
+      "stars": false,
+      "clouds": false,
+      "postFX": true
+    },
+    "quality": "balanced"
+  },
+  "directionId": "score",
+  "interpretation": "从晶体预设出发，将「可漫步的谱纸」译为一颗留白充足的夜色构体：棱面和稀疏棱柱提供建筑般的尺度，分段路径制造有限的错拍感。它是图纸与谱纸关系的视觉联想，而非真实城市或音乐的再现。",
+  "decisions": [
+    {
+      "intent": "让「可漫步的谱纸」呈现规划的秩序，同时给分叉与留白留下位置。",
+      "module": "geometry",
+      "implementation": "以低起伏的棱面核心和16簇稀疏矿物棱柱组织线条与间隔，保留大块未填满的暗面。"
+    },
+    {
+      "intent": "让微弱亮处像图纸上的局部标记，而不是把整座夜城点亮。",
+      "module": "material",
+      "implementation": "使用深墨蓝、石板灰蓝与少量浅青色；降低发光，以定向照明形成清晰的明暗边界。"
+    },
+    {
+      "intent": "用不等间隔暗示错拍，不把建筑变成随音乐舞动的物体。",
+      "module": "orbits",
+      "implementation": "选用倾斜的分段角形轨道，并以缓慢自转和轻微局部辉光变化维持运动。"
+    }
+  ],
+  "fallbacks": [
+    {
+      "requested": "俯视的细密墨线建筑图纸与半透明描图纸",
+      "substitute": "固定视角下的暗色棱面核心、稀疏棱柱和角形轨道",
+      "reason": "渲染器没有俯视相机控制、平面图纸或描图纸材质；球体与棱柱只能表达线条和留白的关系，不能呈现真正的建筑平面图。"
+    },
+    {
+      "requested": "光点沿分叉线条行进，并以不等距节点停留",
+      "substitute": "分段轨道提供不等间隔，缓慢自转与轻微局部辉光变化提供有限的节奏感",
+      "reason": "不支持沿线行进、跳过节点的独立光点，也不能逐格控制窗灯。"
+    }
+  ],
+  "degraded": false,
+  "meta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_0ca87ffb36f3012c016ad48a9b1eb881979b3f5b698a8ed885",
+    "usage": {
+      "input_tokens": 3311,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 884,
+      "output_tokens_details": {
+        "reasoning_tokens": 198
+      },
+      "total_tokens": 4195,
+      "attribution": {
+        "items": {
+          "msg_0ca87ffb36f3012c016ad48a9b1ed88197975e68f0032085f2": {
+            "input_tokens": 2197,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 2197,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_0ca87ffb36f3012c016ad48aa132448197a9dae000b7659a89": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 686,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 686
+              }
+            ]
+          },
+          "rs_0ca87ffb36f3012c016ad48aa100348197a4ce0f6ae0e9eee9": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 198
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 632,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 480,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "profileMeta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_05edc505e7fe8c3e016ad48a84f4748191b335bdb056d5d65b",
+    "usage": {
+      "input_tokens": 1034,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 1133,
+      "output_tokens_details": {
+        "reasoning_tokens": 110
+      },
+      "total_tokens": 2167,
+      "attribution": {
+        "items": {
+          "msg_05edc505e7fe8c3e016ad48a84f4a08191b0dad6d265498a76": {
+            "input_tokens": 119,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 119,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_05edc505e7fe8c3e016ad48a887dd481919bb968402f2c211f": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 1023,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 1023
+              }
+            ]
+          },
+          "rs_05edc505e7fe8c3e016ad48a883b1881919cd52b08b29da930": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 110
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 630,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 283,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  }
+}

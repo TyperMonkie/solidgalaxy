@@ -1,0 +1,257 @@
+{
+  "renderSpec": {
+    "version": 1,
+    "style": "nebula",
+    "seed": 656614063,
+    "geometry": {
+      "enabled": true,
+      "type": "flowing",
+      "complexity": 0.76,
+      "displacement": 0.14
+    },
+    "material": {
+      "palette": [
+        "#173A49",
+        "#A98D70",
+        "#F3D5A0"
+      ],
+      "roughness": 0.79,
+      "metalness": 0.06,
+      "emission": 0.12
+    },
+    "atmosphere": {
+      "enabled": true,
+      "color": "#E6BE91",
+      "strength": 0.2
+    },
+    "orbits": {
+      "enabled": true,
+      "type": "ribbons",
+      "tilt": -0.3
+    },
+    "structures": {
+      "enabled": false,
+      "count": 0
+    },
+    "lighting": {
+      "enabled": true,
+      "intensity": 1.48,
+      "ambient": 0.14
+    },
+    "animation": {
+      "enabled": true,
+      "rotation": 0.041,
+      "flow": 0.34
+    },
+    "modules": {
+      "stars": false,
+      "clouds": true,
+      "postFX": false
+    },
+    "quality": "balanced"
+  },
+  "directionId": "d1",
+  "interpretation": "晨光照着一颗有海岸刻度的星球：深海留出未知，浅色陆地提示方向。它缓缓转动，开放的弧带围出同行的空间，也给临时改道留下余地。",
+  "decisions": [
+    {
+      "intent": "让「向海而行」与「留有刻度」并存：方向清楚，路径仍有余地。",
+      "module": "geometry",
+      "implementation": "采用起伏克制的连续地表、深色海盆与浅暖色海岸；以海岸层次暗示旧地图的刻度，不绘制固定路线。"
+    },
+    {
+      "intent": "呼应「会涨潮的地图」里温暖、松弛的清晨，而不让亮光盖过地形。",
+      "module": "material",
+      "implementation": "以深海蓝、旧纸般的沙色和少量晨光金构成明暗分明的表面，保持偏哑光的质感。"
+    },
+    {
+      "intent": "让海风般的柔软感与可辨认的路线层次同时存在。",
+      "module": "atmosphere",
+      "implementation": "使用轻柔的暖色大气边缘和透明薄雾网格，不遮没海岸。"
+    },
+    {
+      "intent": "呼应「照看同行」：同行有联系，却不必被完整的环圈约束。",
+      "module": "orbits",
+      "implementation": "用两条不等长的开放弧带围出留白，不增加零散岩块。"
+    },
+    {
+      "intent": "让「留有刻度」的稳定感与潮水容许调整的节奏相互衬托。",
+      "module": "animation",
+      "implementation": "星球平稳缓转，表面纹理缓慢流动；弧带沿渲染器既定方式运动。"
+    },
+    {
+      "intent": "呈现出发时的晨光，也给等待同伴的安静一面留下空间。",
+      "module": "lighting",
+      "implementation": "以较明亮的左上方主光照出海岸，保留背光面的阴影。"
+    }
+  ],
+  "fallbacks": [
+    {
+      "requested": "随潮水轻轻移动的旧地图路线",
+      "substitute": "弯曲的海岸层次配合缓慢的表面纹理流动；不形成真正移动的路线",
+      "reason": "当前无法绘制可改道的地图标线，也不支持流体模拟。"
+    },
+    {
+      "requested": "各按自己速度环行、偶尔在营地附近相遇的小光点",
+      "substitute": "两条不等长的开放弧带与海岸上的克制亮色；不呈现独立光点或相遇事件",
+      "reason": "当前没有可分别设定轨道和速度的独立光点，也没有指定地点的营地模型或灯光。"
+    },
+    {
+      "requested": "从海平面漫入的晨光与海风中的薄雾",
+      "substitute": "左上方暖色主光、柔和大气边缘和透明薄雾网格",
+      "reason": "当前晨光为定向照明，薄雾为透明网格壳层，均非体积效果。"
+    }
+  ],
+  "degraded": false,
+  "meta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_03ea83ea6626483c016ad48e642d54819589280044fb331ac4",
+    "usage": {
+      "input_tokens": 3430,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 1155,
+      "output_tokens_details": {
+        "reasoning_tokens": 272
+      },
+      "total_tokens": 4585,
+      "attribution": {
+        "items": {
+          "msg_03ea83ea6626483c016ad48e642d6c81959f0cc32aadde6ae5": {
+            "input_tokens": 2097,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 2097,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_03ea83ea6626483c016ad48e6a59388195b58c4a193350ee6a": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 883,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 883
+              }
+            ]
+          },
+          "rs_03ea83ea6626483c016ad48e6a1a6c81958c940c22664b3cff": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 272
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 851,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 480,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "dna": {
+    "version": 1,
+    "seed": 656614063,
+    "title": "潮汐会改写的路线",
+    "vision": "这颗星球像一张铺在海风里的旧地图：清晨的光照亮营地，也照亮尚未标出的城市。地图线有刻度，却会随潮水轻轻偏移；它鼓励出发，不要求每次都照原路前进。星球平稳旋转，周围的小光点各按自己的速度环行，偶尔靠近同一片温暖海岸。这里的计划不是围栏，而是让同行的人能安心调整脚步、再次相遇的路标。",
+    "emotionalAtmosphere": "清晨海风般明亮、温暖而松弛；有出发的兴奋，也有等同伴跟上的耐心。",
+    "themes": [
+      {
+        "name": "向海而行",
+        "interpretation": "喜欢组织海边露营，也想前往陌生城市；出发本身带着邀请他人同行的意味。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "留有刻度",
+        "interpretation": "收集旧地图、希望事情按计划来，与清晨跑步的习惯一起，为远行提供可依循的刻度。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "照看同行",
+        "interpretation": "自述主动，也愿意照顾朋友的节奏；这让组织一次出发不只是安排路线，还包括给同行者留出余地。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      }
+    ],
+    "contrasts": [
+      {
+        "between": [
+          "向海而行",
+          "留有刻度"
+        ],
+        "relationship": "想去陌生城市，也希望行程有计划；探索欲与秩序感可以共同决定前进的方向。",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "between": [
+          "主动出发",
+          "照看同行"
+        ],
+        "relationship": "主动组织旅程，却愿意照顾朋友的节奏，让热情不必变成催促。",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      }
+    ],
+    "motifs": [
+      {
+        "description": "随潮水轻轻移动的地图线",
+        "meaning": "计划提供方向，却不封死探索陌生地方的可能。"
+      },
+      {
+        "description": "不完全同步的环行小光点",
+        "meaning": "同行不等于步调一致，彼此仍可以相遇。"
+      }
+    ],
+    "directions": [
+      {
+        "id": "d1",
+        "name": "会涨潮的地图",
+        "vision": "让旧地图不再固定路线，而成为会呼吸的海岸：刻度帮助出发，潮水留下改变计划的余地。",
+        "composition": "一颗开阔的暖色海岸星球，旧地图般的细线随地形弯曲，海边营地只是一小簇温柔的光。晨光从宽阔的海平面漫入，薄雾让纸张般的表面显得柔软。",
+        "motion": "星球匀速缓转；地图线像潮线缓慢改道。几颗远近不同的小光点以各自步调环行，偶尔在营地附近相遇，不必排成整齐队伍。"
+      },
+      {
+        "id": "d2",
+        "name": "等人的晨跑道",
+        "vision": "把跑道变成一条可结伴的海岸线：它有方向和节奏，也允许每位同行者按自己的速度抵达。",
+        "composition": "以清晨跑步的环形路径构成星球轮廓，路径内侧是温暖的海岸和零星灯火；整体留出大片明亮天空，以柔软的沙、布与晨雾代替冷硬质面。",
+        "motion": "外圈按稳定步频旋转，内侧的灯光则时近时远、各有节奏；海面薄雾缓缓越过路径，使规律的脚步始终留有停下来等人的空间。"
+      }
+    ],
+    "selectedDirectionId": "d1",
+    "intensity": 0.58,
+    "uncertainty": "素材仅有一段虚构人物的自述，尚不清楚这些偏好在不同情境中如何变化。这是可修改的创意解读，不是对真实人格的揭示。"
+  }
+}
