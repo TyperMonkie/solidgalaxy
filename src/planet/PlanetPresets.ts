@@ -1,5 +1,6 @@
 import { validateRenderSpec, type RenderSpec, type Style } from './RenderSpec.ts';
 import { fractureForSeed } from './FractureField.ts';
+import { proceduralSettings } from './ProceduralSettings.ts';
 export const PRESET_INFO = {
   nebula: { name: 'NEBULA', subtitle: 'The quiet dreamer', description: 'Soft currents. Boundless possibilities.\nA little mystery, a world of your own.', number: '01', tag: 'FLUID / ATMOSPHERIC', color: '#b7a6ef' },
   fracture: { name: 'FRACTURE', subtitle: 'Beautifully uncontained', description: 'Born from change. Lit from within.\nThere is beauty in breaking the familiar.', number: '02', tag: 'TECTONIC / MOLTEN', color: '#e9a27c' },
@@ -18,6 +19,7 @@ export function createPreset(style: Style, seed = 78291): RenderSpec {
     modules: { stars: false, clouds: false, postFX: true },
     mascot:{enabled:true,outfit:'classic',accessory:'none',accent:'#b7a6ef',label:'',meaning:'这只奶蛙还在等待你的故事。生成后，AI 会把你的偏爱组合成它的装扮与随身物件。'},
     landmarks:[],
+    ...proceduralSettings(seed),
   };
   if (style === 'fracture') {
     common.geometry = { enabled: true, type: 'tectonic', complexity: 0.8, displacement: 0.3, fractures:fractureForSeed(seed) };

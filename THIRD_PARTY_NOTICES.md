@@ -7,6 +7,10 @@ Source adaptations are described in docs/IMPLEMENTATION_REPORT.md and docs/PRODU
 ## dgreenheck-threejs-procedural-planets
 Inspected commit: 23457d4f8e6bedf22aa266e12c92f850822ff3a4
 
+Source: https://github.com/dgreenheck/threejs-procedural-planets
+
+Expanded integration (2026-10-19): `index.html` simplex/fractal/ridged terrain functions are retained in `src/planet/vendor/greenheck-terrain.glsl`; its five elevation-colour blends are adapted in `vendor/greenheck-layers.glsl`. Vertex displacement and finite-difference bump normals are adapted in `shaders/terrain.glsl` and `surface.frag.glsl`. `scripts/atmosphere.js`, atmosphere shaders and `public/cloud.png` supply the cloud-sprite implementation and asset in `PlanetClouds.ts` and `public/textures/greenheck-cloud.png`. Defaults from `scripts/main.js` and control ranges from `scripts/ui.js` inform `ProceduralSettings.ts` and the controls. Changes include deterministic sampling, a unit-radius coordinate system, validated terrain/weather specifications, corrected lighting spaces, distance-scaled cloud sprites, bounded resource counts, live uniform updates, AI compilation and social-scene integration. The upstream site UI, full application shell and skybox assets are not copied. Full implementation notes: `docs/PROCEDURAL_RENDERER.md`.
+
 MIT License
 
 Copyright (c) 2023 Daniel Greenheck

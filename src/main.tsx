@@ -4,5 +4,7 @@ import SocialUniverse from './social/SocialUniverse.tsx';
 import './style.css';
 import PublicAccess from './PublicAccess.tsx';
 const FractureStudy=lazy(()=>import('./planet/FractureStudy.tsx'));
+const PlanetLab=lazy(()=>import('./planet/PlanetLab.tsx'));
 const study=new URLSearchParams(location.search).get('fracture-study')==='1';
-createRoot(document.getElementById('root')!).render(<React.StrictMode><Suspense fallback={null}>{study?<FractureStudy/>:<SocialUniverse/>}</Suspense><PublicAccess/></React.StrictMode>);
+const lab=new URLSearchParams(location.search).get('planet-lab')==='1';
+createRoot(document.getElementById('root')!).render(<React.StrictMode><Suspense fallback={null}>{lab?<PlanetLab/>:study?<FractureStudy/>:<SocialUniverse/>}</Suspense><PublicAccess/></React.StrictMode>);

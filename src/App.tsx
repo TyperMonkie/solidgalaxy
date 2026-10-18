@@ -10,6 +10,7 @@ import { validateRenderSpec, type LandmarkSpec, type MascotSpec } from './planet
 import { LANDMARK_GLYPHS } from './planet/PlanetLandmarks.ts';
 import { DNASchema } from './ai/schemas.ts';
 import type { Resident } from './social/model.ts';
+import PlanetTuner from './planet/PlanetTuner.tsx';
 
 export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resident;onBack?:()=>void;onPublish?:(world:Interpretation)=>Promise<void>}={}){
   const [spec,setSpec]=useState(()=>{if(initialWorld)return initialWorld.renderSpec;const preview=createPreset('nebula');preview.modules.clouds=true;preview.animation.rotation=.065;preview.animation.flow=.65;return preview;});
@@ -19,6 +20,7 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
   const [stage,setStage]=useState<GenerationStage|null>(null),[error,setError]=useState(''),[renderError,setRenderError]=useState('');
   const [about,setAbout]=useState(false),[studio,setStudio]=useState(false),[captureMode,setCaptureMode]=useState(false),[toast,setToast]=useState('');
   const [activeTheme,setActiveTheme]=useState(0);
+  const [tuning,setTuning]=useState(false);
   const [selectedLandmark,setSelectedLandmark]=useState<LandmarkSpec|null>(null);
   const [mascotArtwork,setMascotArtwork]=useState<string|null>(initialWorld?.mascotArtwork||null),[artStage,setArtStage]=useState<'idle'|'drawing'|'generated'|'unavailable'>(initialWorld?.mascotArtwork?'generated':'idle');
   const artSequence=useRef(0);
@@ -74,6 +76,7 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
           {result.degraded&&<p className="form-error">个性化视觉配置未通过校验，当前显示备用示意星球。</p>}
           {result.fallbacks.length>0&&<details className="meaning-details"><summary>当前画面的表达折衷</summary>{result.fallbacks.map((f,i)=><p key={i}>{f.requested} → {f.substitute}。{f.reason}</p>)}</details>}
         </>:<div className="empty-reading"><span className="eyebrow">你的视觉化标签</span><span className="empty-orbit">✳</span><h3>先认识你，<br/>再生成你的世界。</h3><p>输入描述后，AI 会寻找其中的情绪、偏爱和矛盾，组合成一颗有自己气质的动态星球。</p><small>眼前是效果示意，尚未解读你的性格。</small></div>}
+        <button className="pt-open" onClick={()=>setTuning(true)}>✳ 自定义地貌、云海与天气 ↗</button>
         <div className="living-layers"><span className="eyebrow">让世界流动</span>{([
           ['自转',!paused,()=>setPaused(p=>!p)],
           ['蓬松云层',spec.modules.clouds,()=>setSpec(s=>({...s,modules:{...s.modules,clouds:!s.modules.clouds}}))],
@@ -84,6 +87,7 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
         <button className="frog-about" onClick={()=>setStudio(true)}>✳ 认识这只奶蛙 <ArrowUpRight size={12}/></button>
         {artStage!=='idle'&&<p className="mascot-image-status" role="status">{artStage==='drawing'?'正在绘制独特形象，星球可以继续探索…':artStage==='generated'?'专属形象已落在你的星球上':'生图暂不可用，当前保留备用装扮。'}</p>}
       </aside>
+      {tuning&&<aside className="pt-drawer" aria-label="星球地貌与天气编辑器"><button className="pt-drawer-close" aria-label="关闭地貌编辑器" onClick={()=>setTuning(false)}>×</button><PlanetTuner spec={spec} onChange={setSpec}/></aside>}
       <div className="planet-caption"><span className="caption-line"/><div><span className="caption-tag">{result?'YOUR UNIVERSE DNA':'EVERY WORLD STARTS WITH A STORY'}</span><h2>{result?.dna.title||'你的故事，还未抵达'}</h2><p>{result?result.interpretation:'流动的雾、自转的地表、缓缓游移的星带。\n当你分享自己，它们才开始拥有属于你的含义。'}</p></div></div>
       <div className="scene-tools"><button onClick={()=>setPaused(p=>!p)} aria-label={paused?'继续动态':'暂停动态'}>{paused?<Play size={15}/>:<Pause size={15}/>}</button><button onClick={()=>core.current?.resetView()} aria-label="重置视角"><RotateCcw size={15}/></button><button onClick={()=>core.current?.focusMascot()} aria-label="找到奶蛙" title="找到奶蛙"><Sparkles size={15}/></button><span/><button onClick={()=>setCaptureMode(p=>!p)} aria-label="沉浸查看"><Maximize2 size={15}/></button></div>
       <div className="interaction-hint"><span className="mouse-icon"/> 拖动环视 <b>·</b> 滚动靠近</div>

@@ -7,17 +7,22 @@ void main(){
   vec3 tangent=normalize(cross(abs(p.y)>.95?vec3(1,0,0):vec3(0,1,0),p));
   vec3 bitangent=normalize(cross(p,tangent));
   // Greenheck displaced finite-difference normals, corrected to view space.
-  float epsilon=.001;vec3 pos=surfacePoint(p);
+  float epsilon=uProcedural?uBumpOffset:.001;vec3 pos=surfacePoint(p);
   vec3 dx=surfacePoint(normalize(p+epsilon*tangent));
   vec3 dy=surfacePoint(normalize(p+epsilon*bitangent));
   vec3 localNormal=normalize(cross(dx-pos,dy-pos));
   // Mineral relief reads as satin stone; keep micro-slopes from dominating
   // the globe's broad lighting, including legacy low-roughness configurations.
-  if(uStyle>1.5)localNormal=normalize(mix(p,localNormal,.25));
+  if(uProcedural)localNormal=normalize(mix(p,localNormal,uBumpStrength));
+  else if(uStyle>1.5)localNormal=normalize(mix(p,localNormal,.25));
   vec3 N=normalize(normalMatrix*localNormal);
   vec3 V=normalize(-vViewPosition),L=normalize((viewMatrix*vec4(-2.8,3.5,3.8,0.)).xyz),H=normalize(V+L);
   vec3 color;float emission=0.,water=0.;
-  if(uStyle<.5){
+  if(uProcedural){
+    color=elevationColor(h);
+    water=1.-smoothstep(max(.001,uTransitions[1])*.65,max(.002,uTransitions[1]),h);
+    if(uStyle>.5&&uStyle<1.5){float crack=fractureMask(fractureField(p));color=mix(color,uPalette[2]*.16,crack);emission=crack*(1.+.15*sin(uTime*.35+p.y*9.));}
+  }else if(uStyle<.5){
     // Five elevation layers, from Greenheck color12 -> finalColor.
     vec3 ocean=uPalette[0]*.7,shelf=mix(uPalette[0],uPalette[2],.28);
     vec3 coast=mix(uPalette[1],uPalette[2],.18),land=uPalette[1]*.45;

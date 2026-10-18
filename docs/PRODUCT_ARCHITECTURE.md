@@ -14,7 +14,7 @@ PersonaVerse 将用户愿意提供的数字生活片段，解读成一个可探�
 
 首页由个人描述驱动，不要求用户挑选三个模型。`src/ai/client.ts` 先调用 `/api/profile` 并显示“理解描述”，验证 DNA 后调用 `/api/compile` 并显示“构建标签星球”，成功后直接应用渲染配置。标签来自 DNA.themes，展示解释与不确定性；右侧候选方向来自同一人的 DNA.directions，而不是固定渲染预设。用户可以补充音乐、图片等资料，或修正描述再次解读。切换视觉方向仅重新编译，保持 DNA 和 seed。生成失败保留上一次画面，并显示错误；降级配置明确标示。
 
-Profile Agent 的标签描述人的表达、偏爱、习惯和张力，不是将兴趣复制为模型名称。Style Compiler 的 decisions 把这些标签或关系连接到真正选择的地表、空间层和运动。它使用有限能力目录组合图形；目前仍只有三种内部几何家族，不等于能够生成任意三维物体。用户看到的是自己的标签、标题和视觉方向。
+Profile Agent 的标签描述人的表达、偏爱、习惯和张力，不是将兴趣复制为模型名称。Style Compiler 的 decisions 把这些标签或关系连接到真正选择的地表、空间层和运动。它使用有限能力目录组合图形；新世界通过 terrain/weather 连续编译地形与天气；三种内部家族保留作兼容和装饰组合，不等于能够生成任意三维物体。用户看到的是自己的标签、标题和视觉方向。
 
 自转、云层独立漂移、星带运动与进动已接入动画循环。根据最新反馈，云层已替换为直接移植的 Greenheck Atmosphere：原版 cloud.png、球壳云精灵采样、simplex 密度与受光方式，改为带种子的确定采样并适配单位星球和视口。没有继续使用早先的透明噪声网格壳；它也不是光线步进的体积散射。星带已改为透明细丝带，新增 dust 稀疏点状轨道。进动和分层速度是引擎行为，模型控制整体自转与流速，不能任意编写每个标签的动画。系统减少动态偏好会默认暂停，用户可继续。旧 `compare=1` 不再暂停产品首页。
 
@@ -74,7 +74,7 @@ DNA 包括：版本、seed、title、vision、emotionalAtmosphere、themes、con
 
 - `flowing`：基于 Greenheck 的连续多尺度地形、盆地与分层山脊。
 - `tectonic`：粗糙地壳、域扭曲的裂隙和与位移一致的局部发光。
-- `faceted`：高细分连续矿物地表、细密层理与矿脉；保留旧枚举以兼容配置，已取消粗三角切面光照。小型矿物端面是可选点缀，默认关闭。
+- `faceted`：新配置使用同样的连续 terrain 与可选矿物端面。旧世界未提供 terrain 时保留细密矿物层理分支。已取消粗三角切面光照。
 
 `tectonic` 现由 `geometry.fractures` 的疏密、分流、方向、扰动、宽度、覆盖、深度连续组合，种子展开不规则区域和轴向。旧配置可省略该字段并得到稳定的种子变奏；新 AI 编译必须明确输出，其他家族为 null。实现和实测范围见 `docs/FRACTURE_VARIATION.md`。
 - 轨道可以独立选用 `ribbons`、`broken`、`angular`，无需与几何家族固定绑定。
@@ -84,7 +84,7 @@ DNA 包括：版本、seed、title、vision、emotionalAtmosphere、themes、con
 
 输出包括 renderSpec、directionId、interpretation、decisions 和 fallbacks。decisions 解释意图如何落到具体模块，不要求暴露模型的内部推理。
 
-验证包括严格字段白名单、枚举、数值范围、颜色格式、恰好三种颜色、seed 和方向保持一致、style/geometry 家族一致以及主几何启用。配置错误允许一次修复。两次验证均失败才使用内置预设，并返回 `degraded: true`，界面明确展示降级；连接失败、权限不足和拒绝响应不会被伪装成成功的个性化结果。
+验证包括严格字段白名单、枚举、数值范围、颜色格式、material.palette恰好三种装饰颜色、terrain.colors五种海拔颜色及四个分界/融合参数、terrain/weather范围与云资源预算、seed 和方向保持一致、style/geometry 家族一致以及主几何启用。配置错误允许一次修复。两次验证均失败才使用内置预设，并返回 `degraded: true`，界面明确展示降级；连接失败、权限不足和拒绝响应不会被伪装成成功的个性化结果。
 
 ## 4. 接口与运行
 
@@ -104,7 +104,7 @@ DNA 包括：版本、seed、title、vision、emotionalAtmosphere、themes、con
 
 `docs/ai-smoke-result.json` 是一次真实 provider 调用结果：虚构资料 → 三个候选方向 → 通过验证的 CRYSTAL/faceted 配置，`degraded:false`，约 47 秒。端到端 UI 流程另外实测，见实现报告。
 
-已实现可运行的初版个性化链路，但当前视觉词汇仍然只有三种几何家族。能力目录、提示词和验证器需要随着真正实现的新模块同步升级，不能仅通过修改提示词假装增加能力。
+已实现可运行的个性化链路。2026-10-19起，新配置使用 Greenheck 连续地形、五层海拔配色和可配置云天气，不再局限于三种固定地表，详见 `PROCEDURAL_RENDERER.md`。能力目录、提示词和验证器需要随着真正实现的新模块同步升级，不能仅通过修改提示词假装增加能力。
 
 官方接口约定参考：
 

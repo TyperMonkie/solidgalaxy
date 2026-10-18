@@ -1,7 +1,7 @@
 import { createPreset } from '../planet/PlanetPresets.ts';
 import { Color, SRGBColorSpace } from 'three';
 import type { SocialState, Resident } from './model.ts';
-const DEMO_VISUAL_VERSION=2;
+const DEMO_VISUAL_VERSION=3;
 function demoRenderSpec(i:number,energy:number,exploration:number,color:string){
  const renderSpec=createPreset(i%3===0?'nebula':i%3===1?'crystal':'fracture',900071+i*271);
  const hsl=new Color(color).getHSL({h:0,s:0,l:0},SRGBColorSpace);

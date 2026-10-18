@@ -13,6 +13,7 @@ function StudyPlanet({shape,seed}:{shape:FractureSpec;seed:number}){
  const host=useRef<HTMLDivElement>(null);
  useEffect(()=>{
   const s=createPreset('fracture',seed);s.geometry.fractures=shape;s.geometry.displacement=.24;
+  delete s.terrain; // Controlled legacy fracture comparison retains its fixed palette.
   s.material={palette:['#11191f','#607476','#ffbc79'],roughness:.82,metalness:.1,emission:.75};
   s.orbits.enabled=false;s.structures.enabled=false;s.modules.clouds=false;s.modules.postFX=false;s.mascot.enabled=false;
   s.atmosphere.strength=.16;s.animation.rotation=.025;

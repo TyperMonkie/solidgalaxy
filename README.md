@@ -47,3 +47,8 @@ npm start
 - [第三方许可证](THIRD_PARTY_NOTICES.md)
 
 `npm test` 运行本地契约测试，不调用 LLM。`npx tsx server/smoke.ts` 会实际调用配置的 provider，两阶段使用虚构资料，结果保存到 `docs/ai-smoke-result.json`。
+
+
+### 连续地貌与天气（2026-10-19）
+
+导航中的「地貌实验室」打开 `/?planet-lab=1`，直接使用 Greenheck 原作地貌与云参数起步。支持海陆/山脉/五层海拔颜色、云浓淡/厚度/风向等实时编辑、同色随机地貌和自由参数生成；工作室也提供相同编辑器。新AI编译输出同样的 terrain/weather 配置，三个旧风格枚举保留兼容，不再限制为三个固定地表。来源、实际复用范围、兼容与验证见 [连续渲染器说明](docs/PROCEDURAL_RENDERER.md)。

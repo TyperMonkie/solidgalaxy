@@ -1,7 +1,11 @@
 uniform float uTime,uSeed,uStyle,uDisplacement,uComplexity;
 uniform int uOctaves;
+uniform bool uProcedural;
+uniform int uNoiseType;
+uniform float uAmplitude,uSharpness,uOffset,uPeriod,uPersistence,uLacunarity,uRelief,uBumpStrength,uBumpOffset;
 float terrain(vec3 p){
   vec3 q=p+vec3(uSeed,0.,0.);
+  if(uProcedural)return terrainHeight(uNoiseType,q,uAmplitude,uSharpness,uOffset,uPeriod,uPersistence,uLacunarity,uOctaves);
   if(uStyle>1.5){
     // Broad mineral relief plus restrained microdetail. The old ridged fractal
     // amplified tiny slopes into crumpled, glittering normals at close range.
@@ -15,6 +19,12 @@ float terrain(vec3 p){
 }
 float elevation(vec3 p){
   float h=terrain(p),height=h*uDisplacement*.32;
+  if(uProcedural){
+    // Upstream radius=20 becomes 1; h/20 is the original displacement scale.
+    height=h*uRelief;
+    if(uStyle>.5&&uStyle<1.5)height-=uRelief*mix(.035,.3,uFractureB.z)*fractureMask(fractureField(p));
+    return min(height,.32);
+  }
   if(uStyle>.5&&uStyle<1.5){float cut=fractureMask(fractureField(p));height=log(1.+h)*uDisplacement*.25-uDisplacement*mix(.035,.3,uFractureB.z)*cut;}
   else if(uStyle>1.5)height=(h-.35)*uDisplacement*.38;
   return height;

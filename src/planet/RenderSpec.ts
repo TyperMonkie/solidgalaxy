@@ -1,5 +1,12 @@
 export type Style = 'nebula' | 'fracture' | 'crystal';
 export interface FractureSpec {density:number;branching:number;directionality:number;distortion:number;width:number;coverage:number;depth:number;}
+/** Greenheck terrain/noise and elevation-layer controls; independent of decorative family. */
+export interface TerrainSpec {
+ noise:'simplex'|'fractal'|'ridged';amplitude:number;sharpness:number;offset:number;period:number;persistence:number;lacunarity:number;octaves:number;
+ relief:number;bumpStrength:number;bumpOffset:number;
+ colors:[string,string,string,string,string];transitions:[number,number,number,number];blends:[number,number,number,number];
+}
+export interface WeatherSpec {density:number;opacity:number;scale:number;altitude:number;thickness:number;size:number;particles:number;speed:number;drift:number;color:string;}
 export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;}
 export interface LandmarkSpec {id:string;icon:'music'|'guitar'|'headphones'|'camera'|'compass'|'mountain'|'book'|'gamepad'|'lightning'|'heart'|'moon'|'chat'|'star'|'wave'|'flower';label:string;meaning:string;color:string;placement:'companion'|'surface';evidenceIds:string[];}
 export interface RenderSpec {
@@ -17,6 +24,8 @@ export interface RenderSpec {
   quality: 'low' | 'balanced' | 'high';
   mascot:MascotSpec;
   landmarks:LandmarkSpec[];
+  terrain?:TerrainSpec;
+  weather?:WeatherSpec;
 }
 const record = (v: unknown): Record<string, unknown> => {
   if (v === null || typeof v !== 'object' || Array.isArray(v)) throw new Error('RenderSpec requires objects.');
