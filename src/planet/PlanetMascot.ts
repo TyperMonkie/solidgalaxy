@@ -2,6 +2,17 @@ import { CanvasTexture, CircleGeometry, Color, Group, Mesh, MeshBasicMaterial, S
 import type { MascotSpec } from './RenderSpec.ts';
 let imagePromise:Promise<HTMLImageElement>|undefined;
 export function frogImage(){return imagePromise??=new Promise<HTMLImageElement>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{imagePromise=undefined;reject(new Error('Milkfrog asset could not be loaded'));};img.src='/mascot/milkfrog.png';});}
+const generatedImages=new Map<string,Promise<HTMLImageElement>>();
+function generatedImage(url:string){let pending=generatedImages.get(url);if(!pending){pending=new Promise<HTMLImageElement>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{generatedImages.delete(url);reject(new Error('Generated character could not be loaded'));};img.src=url;});generatedImages.set(url,pending);}return pending;}
+/** Image models paint the complete new character; remove only the requested green backdrop. */
+export async function paintMascotPortrait(canvas:HTMLCanvasElement,s:MascotSpec,artwork:string|null=null){
+ if(!artwork){paintMascot(canvas,await frogImage(),s);return;}
+ const image=await generatedImage(artwork),ctx=canvas.getContext('2d')!;ctx.clearRect(0,0,canvas.width,canvas.height);
+ const size=Math.min(canvas.width,canvas.height);ctx.drawImage(image,(canvas.width-size)/2,canvas.height-size,size,size);
+ const pixels=ctx.getImageData(0,0,canvas.width,canvas.height),p=pixels.data;
+ for(let i=0;i<p.length;i+=4){const green=p[i+1],other=Math.max(p[i],p[i+2]),excess=green-other;if(green>85&&excess>35){const key=Math.min(1,Math.max(0,(excess-35)/70));p[i+3]=Math.round(p[i+3]*(1-key));if(key<1)p[i+1]=Math.min(green,other+20);}}
+ ctx.putImageData(pixels,0,0);
+}
 function round(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number,fill:string,stroke?:string){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=6;ctx.stroke();}}
 function accessory(ctx:CanvasRenderingContext2D,s:MascotSpec){
  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
@@ -33,7 +44,7 @@ export function paintMascot(canvas:HTMLCanvasElement,image:HTMLImageElement,s:Ma
  }
  accessory(ctx,s);
 }
-export function createMascot(s:MascotSpec){
+export function createMascot(s:MascotSpec,artwork:string|null=null){
  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1200;
  const texture=new CanvasTexture(canvas);texture.colorSpace=SRGBColorSpace;
  const material=new SpriteMaterial({map:texture,transparent:true,depthWrite:false});
@@ -46,6 +57,6 @@ export function createMascot(s:MascotSpec){
   ctx.fillStyle='#fff0ca';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s.label,384,66);
   const map=new CanvasTexture(badge);map.colorSpace=SRGBColorSpace;const nameplate=new Sprite(new SpriteMaterial({map,transparent:true,depthWrite:false}));nameplate.scale.set(.58,.097,1);nameplate.position.set(0,.64,.015);nameplate.renderOrder=6;group.add(nameplate);
  }
- void frogImage().then(image=>{if(texture.userData.released)return;paintMascot(canvas,image,s);texture.needsUpdate=true;}).catch(()=>{sprite.visible=false;});
+ void paintMascotPortrait(canvas,s,artwork).then(()=>{if(texture.userData.released)return;texture.needsUpdate=true;}).catch(()=>{void paintMascotPortrait(canvas,s).then(()=>{if(!texture.userData.released)texture.needsUpdate=true;}).catch(()=>{sprite.visible=false;});});
  return {group,sprite};
 }

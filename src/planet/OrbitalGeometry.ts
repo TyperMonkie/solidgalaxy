@@ -8,22 +8,26 @@ export function createOrbits(s:RenderSpec){
  const primary=new Color(s.material.palette[1]).lerp(new Color(s.material.palette[2]),.7).lerp(new Color('#d0e8ff'),.23);
  const secondary=new Color(s.material.palette[2]).lerp(new Color('#f5d5ab'),.32);
  const dustOnly=s.orbits.type==='dust',broken=s.orbits.type==='broken',angular=s.orbits.type==='angular';
- const layers=dustOnly?3:10;
+ const layers=dustOnly?3:angular?8:broken?9:10;
+ const orbitPhase=hashSeed(s.seed,39001)*Math.PI*2;
+ const polygonSides=5+Math.floor(hashSeed(s.seed,39002)*3);
+ const polygonRadius=(a:number,radius:number)=>radius*Math.cos(Math.PI/polygonSides)/Math.cos(((a%(Math.PI*2/polygonSides))+(Math.PI*2/polygonSides))%(Math.PI*2/polygonSides)-Math.PI/polygonSides);
  for(let k=0;k<layers;k++){
-  const veil=k<3, radius=veil?1.54+k*.19:1.49+(k-3)*.086;
-  const start=k*.83-.9, length=broken?1.25+(k%3)*.4:angular?2.25:4.35+(k%3)*.49;
+  const veil=k<3, radius=broken?1.54+Math.floor(k/3)*.17:veil?1.54+k*.19:1.49+(k-3)*.086;
+  const start=broken?(k%3)*Math.PI*2/3+Math.floor(k/3)*.26+orbitPhase:angular?k*.97+orbitPhase:k*.83-.9;
+  const length=broken?.45+hashSeed(s.seed,39100+k)*.45:angular?2.1+(k%3)*.42:4.35+(k%3)*.49;
   const width=veil?(dustOnly?.09:.14+k*.025):.005+(k%3)*.004;
   const seg=Math.ceil(length*64),rows=veil?12:4,pos:number[]=[],uv:number[]=[],indices:number[]=[];
   for(let i=0;i<=seg;i++)for(let j=0;j<=rows;j++){
    const t=i/seg,a=start+t*length,v=j/rows,taper=.28+.72*Math.pow(Math.sin(t*Math.PI),.6);
-   const rad=radius+(v-.5)*width*taper+Math.sin(a*2.+k*.43)*.032;
-   pos.push(Math.cos(a)*rad,Math.sin(a)*rad,Math.sin(a*2.+k*.48)*(.035+k*.007)+(v-.5)*.035);uv.push(t,v);
+   const rad=(angular?polygonRadius(a,radius):radius)+(v-.5)*width*taper+(angular?0:Math.sin(a*2.+k*.43)*.032);
+   pos.push(Math.cos(a)*rad,Math.sin(a)*rad,angular?(k%3-1)*.045:Math.sin(a*2.+k*.48)*(.035+k*.007)+(v-.5)*.035);uv.push(t,v);
    if(i<seg&&j<rows){const b=i*(rows+1)+j;indices.push(b,b+rows+1,b+1,b+1,b+rows+1,b+rows+2);}
   }
   const geometry=new BufferGeometry();geometry.setAttribute('position',new Float32BufferAttribute(pos,3));geometry.setAttribute('uv',new Float32BufferAttribute(uv,2));geometry.setIndex(indices);
   const material=new ShaderMaterial({side:DoubleSide,transparent:true,depthWrite:false,blending:AdditiveBlending,
-   uniforms:{uColor:{value:k%2?primary:secondary},uOther:{value:k%2?secondary:primary},uTime:{value:0},uPhase:{value:k*.76},uVeil:{value:veil?1:0},uStrength:{value:dustOnly?.43:1}},
-   vertexShader:`uniform float uTime,uPhase;varying vec2 vUv;varying vec3 vWorld;void main(){vUv=uv;vec3 p=position;float a=atan(p.y,p.x);p.z+=sin(a*2.+uTime*.24+uPhase)*.045;vWorld=(modelMatrix*vec4(p,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+   uniforms:{uColor:{value:k%2?primary:secondary},uOther:{value:k%2?secondary:primary},uTime:{value:0},uPhase:{value:k*.76},uVeil:{value:veil?1:0},uStrength:{value:dustOnly?.43:broken?1.3:1},uAngular:{value:angular?1:0}},
+   vertexShader:`uniform float uTime,uPhase,uAngular;varying vec2 vUv;varying vec3 vWorld;void main(){vUv=uv;vec3 p=position;float a=atan(p.y,p.x);p.z+=sin(a*2.+uTime*.24+uPhase)*mix(.045,.006,uAngular);vWorld=(modelMatrix*vec4(p,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
    fragmentShader:`uniform vec3 uColor,uOther;uniform float uTime,uPhase,uVeil,uStrength;varying vec2 vUv;varying vec3 vWorld;
    void main(){float edge=pow(max(0.,1.-abs(vUv.y*2.-1.)),mix(1.3,2.1,uVeil));float ends=smoothstep(0.,.06,vUv.x)*(1.-smoothstep(.88,1.,vUv.x));
     float stream=.5+.5*sin(vUv.x*18.-uTime*.65+uPhase);float threads=pow(.5+.5*sin(vUv.y*78.+vUv.x*8.-uTime*.28+uPhase),7.);
@@ -35,10 +39,11 @@ export function createOrbits(s:RenderSpec){
    }`});
   group.add(new Mesh(geometry,material));
  }
- const count=s.quality==='low'?(dustOnly?2400:900):(dustOnly?6200:2200),positions:number[]=[],phases:number[]=[],sizes:number[]=[],colors:number[]=[];
+ const count=s.quality==='low'?(dustOnly?2400:broken?420:900):(dustOnly?6200:broken?1100:angular?1500:2200),positions:number[]=[],phases:number[]=[],sizes:number[]=[],colors:number[]=[];
  for(let i=0;i<count;i++){
-  const r=(slot:number)=>hashSeed(s.seed,40000+i*7+slot),a=r(0)*Math.PI*2,lane=i%5;
-  const radius=1.47+lane*.105+(r(1)-.5)*(dustOnly?.18:.075);
+  const r=(slot:number)=>hashSeed(s.seed,40000+i*7+slot),lane=i%(broken?3:5);
+  const a=broken?(i%3)*Math.PI*2/3+lane*.26+orbitPhase+r(0)*.65:r(0)*Math.PI*2;
+  const baseRadius=1.47+lane*.105+(r(1)-.5)*(dustOnly?.18:.075),radius=angular?polygonRadius(a,baseRadius):baseRadius;
   positions.push(Math.cos(a)*radius,Math.sin(a)*radius,(r(2)-.5)*.055+Math.sin(a*2.+lane*.45)*.06);
   phases.push(r(3)*Math.PI*2);sizes.push(i%83===0?3.1+r(4)*1.5:.65+r(4)*1.35);
   const c=primary.clone().lerp(secondary,r(5));colors.push(c.r,c.g,c.b);

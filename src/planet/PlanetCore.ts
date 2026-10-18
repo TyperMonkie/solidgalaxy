@@ -35,6 +35,7 @@ export class PlanetCore {
   private shaders:ShaderMaterial[]=[];private rotationLight:DirectionalLight;private fill:HemisphereLight;
   private environment:ReturnType<PMREMGenerator['fromScene']>;
   private mascotSprite:Sprite|null=null;private planetSurface:Mesh|null=null;private pointerDown=new Vector2();
+  private mascotArtwork:string|null=null;
   onMascotSelect?:()=>void;
   private landmarkSprites:Sprite[]=[];onLandmarkSelect?:(landmark:LandmarkSpec)=>void;
   onStats?:(stats:PlanetStats)=>void;
@@ -63,7 +64,7 @@ export class PlanetCore {
     if(spec.orbits.enabled){this.orbit=createOrbits(spec);this.root.add(this.orbit);const materials=new Set<ShaderMaterial>();this.orbit.traverse(o=>{if((o instanceof Mesh||o instanceof Points)&&o.material instanceof ShaderMaterial)materials.add(o.material);});this.shaders.push(...materials);}
     if(spec.structures.enabled&&spec.structures.count>0)this.globe.add(createStructures(spec));
     if(spec.modules.clouds){const clouds=createClouds(spec);this.globe.add(clouds);this.shaders.push(clouds.material);this.cloudLayer=clouds;clouds.rotation.y=this.time*.012;}
-    if(spec.mascot.enabled){const mascot=createMascot(spec.mascot);this.globe.add(mascot.group);this.mascotSprite=mascot.sprite;}
+    if(spec.mascot.enabled){const mascot=createMascot(spec.mascot,this.mascotArtwork);this.globe.add(mascot.group);this.mascotSprite=mascot.sprite;}
     if(spec.landmarks.length){const landmarks=createLandmarks(spec.landmarks);this.globe.add(landmarks.group);this.landmarkSprites=landmarks.sprites;}
     this.root.add(this.globe);this.rotationLight.intensity=spec.lighting.enabled?spec.lighting.intensity*2:0;this.fill.intensity=spec.lighting.ambient*5;
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,spec.quality==='high'?1.75:spec.quality==='low'?1:1.25));
@@ -71,6 +72,7 @@ export class PlanetCore {
     this.resize();
   }
   setPaused(paused:boolean){this.spec.animation.enabled=!paused;}
+  setMascotArtwork(url:string|null){if(url===this.mascotArtwork)return;this.mascotArtwork=url;this.setSpec(this.spec);}
   resetView(){this.camera.position.set(0,.15,6.8);this.controls.target.set(0,0,0);this.controls.update();}
   focusMascot(){if(!this.mascotSprite)return;this.scene.updateMatrixWorld(true);const position=this.mascotSprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(6.2));this.controls.target.set(0,0,0);this.controls.update();}
   focusLandmark(id:string){const sprite=this.landmarkSprites.find(s=>s.userData.landmark.id===id);if(!sprite)return;this.scene.updateMatrixWorld(true);const position=sprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(5.5));this.controls.target.set(0,0,0);this.controls.update();}

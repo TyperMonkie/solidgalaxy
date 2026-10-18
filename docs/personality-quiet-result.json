@@ -1,0 +1,406 @@
+{
+  "synthetic": true,
+  "dna": {
+    "version": 1,
+    "seed": 10818001,
+    "title": "月径留白",
+    "vision": "这是一颗把声音放轻的世界。宽阔的深灰暗面不急于被照亮，月白细径沿着平缓台地伸展，在转弯处留出可以停步的空白。几道浅纹让地表有柔和的秩序，薄雾只在低处缓缓移动，不遮住路；一道偏斜的轨迹比星体转得更慢。远看是安静而清晰的轮廓，走近才发现弧线、页纹与路径之间的小小呼应：有人可以独处，也可以在被耐心听见时，慢慢把话说完。",
+    "emotionalAtmosphere": "月夜般清凉、亲近而不拥挤；细致的秩序为沉默和回应都留了位置。",
+    "themes": [
+      {
+        "name": "留白有序",
+        "interpretation": "自述偏爱空白、不喜热闹炫耀，又希望世界柔和而有细腻秩序；这里的空白是经过照料的空间，不是缺少内容。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "缓缓靠近",
+        "interpretation": "自述会认真倾听朋友，并在熟悉的人身边慢慢表达；亲近感更像逐步打开的路径，而非瞬间照亮的舞台。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      },
+      {
+        "name": "夜行观照",
+        "interpretation": "阅读、月夜散步和安静观察被放在一起，形成一种愿意放慢脚步、留意细节的日常节奏。",
+        "evidenceIds": [
+          "posts:0"
+        ],
+        "confidence": "supported"
+      }
+    ],
+    "contrasts": [
+      {
+        "between": [
+          "留白有序",
+          "缓缓靠近"
+        ],
+        "relationship": "希望空间安静、不过度展示，同时也愿意认真倾听，并在熟悉的人身边逐渐表达；留白不是拒绝交流。",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      }
+    ],
+    "motifs": [
+      {
+        "description": "一只圆肚奶蛙，微微侧身坐着，像正给身旁留座；穿雾灰色短披肩，只带一枚月白书签，短名牌写「慢慢」。",
+        "meaning": "用安静观察与认真倾听连接阅读、夜行和逐渐表达，而不把这些喜好堆满星球。"
+      },
+      {
+        "description": "暗面边缘一段纤细、未被照亮的步径。",
+        "meaning": "月夜散步不是奔向终点，也可以是给观察留出的时间。"
+      },
+      {
+        "description": "地表几道疏朗、近似页边的浅层纹理。",
+        "meaning": "以阅读的节奏暗示细腻秩序，而非陈列一本具体的书。"
+      },
+      {
+        "description": "两段相隔一段空白的弧线，一段微微朝向另一段。",
+        "meaning": "把倾听与慢慢表达理解为有间距的交流；这是视觉比喻，不是具体关系的记录。"
+      }
+    ],
+    "directions": [
+      {
+        "id": "nightpath",
+        "name": "留白的夜径",
+        "vision": "不把安静画成一团发光的云，而让它成为可步行的地形：克制的坡度、清楚的边缘和容得下停顿的阴影。路并不通向舞台，只在暗处延伸。",
+        "composition": "一颗偏离画面中心的深灰星体，宽阔的暗面占据主体；月白色细径沿低缓的台地绕行，外侧保留大片空域。稀薄雾气只停在路径的凹处，一道倾斜的细轨道从暗面后方掠过。",
+        "motion": "星体缓慢自转，让细径逐段进入光中；地表薄雾稍稍滞后，轨道则以更慢的节奏经过，像倾听之后才有的回应。"
+      },
+      {
+        "id": "pagefold",
+        "name": "页边的缓坡",
+        "vision": "把阅读和留白意外地连成一种地貌：不是巨大的藏书室，而是层层可停驻的纸质缓坡。温暖的侧光使秩序显得柔软，不必靠密集装饰证明它的存在。",
+        "composition": "暖象牙色的扁平星体由错开的薄层构成，侧面显出书页般的起伏；大片明亮背景衬托层间柔影。没有完整光环，只有一小段低角度弧线，云层也只在层缘投下浅影。",
+        "motion": "薄层随整体匀速转动，边缘的浅雾缓慢游移；短弧偶尔与层线对齐，像尚未说出口的话找到间隔。"
+      }
+    ],
+    "selectedDirectionId": "nightpath",
+    "intensity": 0.38,
+    "uncertainty": "素材只有一段关于虚构测试人物的自述；地形、弧线与奶蛙都是据此提出的一种可修改的创意诠释，并非对真实人格或经历的揭示。"
+  },
+  "renderSpec": {
+    "version": 1,
+    "style": "nebula",
+    "seed": 10818001,
+    "geometry": {
+      "enabled": true,
+      "type": "flowing",
+      "complexity": 0.32,
+      "displacement": 0.085
+    },
+    "material": {
+      "palette": [
+        "#191C1D",
+        "#686760",
+        "#E8DFCC"
+      ],
+      "roughness": 0.86,
+      "metalness": 0.07,
+      "emission": 0.06
+    },
+    "atmosphere": {
+      "enabled": true,
+      "color": "#A9A49C",
+      "strength": 0.1
+    },
+    "orbits": {
+      "enabled": true,
+      "type": "broken",
+      "tilt": -0.69
+    },
+    "structures": {
+      "enabled": false,
+      "count": 0
+    },
+    "lighting": {
+      "enabled": true,
+      "intensity": 1.12,
+      "ambient": 0.17
+    },
+    "animation": {
+      "enabled": true,
+      "rotation": 0.026,
+      "flow": 0.16
+    },
+    "modules": {
+      "stars": false,
+      "clouds": false,
+      "postFX": false
+    },
+    "quality": "balanced",
+    "mascot": {
+      "enabled": true,
+      "outfit": "classic",
+      "accessory": "book",
+      "accent": "#F0DDC1",
+      "label": "慢慢",
+      "meaning": "原画奶蛙穿经典装束，带一本书，配月白暖调的「慢慢」名牌：把阅读、安静观察和耐心倾听放在身边，而不让它们占满整个世界。侧身留座与书签是创意设想，并非此装扮可呈现的动作或配件。"
+    },
+    "landmarks": [
+      {
+        "id": "reading",
+        "icon": "book",
+        "label": "页边",
+        "meaning": "阅读是放慢脚步、留意细节的日常线索。",
+        "color": "#F0E5CA",
+        "placement": "companion",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "speaking",
+        "icon": "chat",
+        "label": "慢慢说",
+        "meaning": "在熟悉的人身边逐渐表达，不必立刻把话说完。",
+        "color": "#E8BDAA",
+        "placement": "companion",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "moonwalk",
+        "icon": "moon",
+        "label": "月夜",
+        "meaning": "月夜散步给安静观察留出时间。",
+        "color": "#F1E8D8",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "pause",
+        "icon": "compass",
+        "label": "停步",
+        "meaning": "路径并非急着抵达；指南针在这里借指允许停顿的方向感，并非旅行爱好。",
+        "color": "#D8C89C",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "listening",
+        "icon": "heart",
+        "label": "倾听",
+        "meaning": "认真听朋友说话，让亲近有耐心而不拥挤。",
+        "color": "#F0C6B7",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      },
+      {
+        "id": "spacing",
+        "icon": "wave",
+        "label": "留白",
+        "meaning": "疏开的波纹是细腻秩序的抽象比喻，不代表水上活动。",
+        "color": "#DDD4BF",
+        "placement": "surface",
+        "evidenceIds": [
+          "posts:0"
+        ]
+      }
+    ]
+  },
+  "directionId": "nightpath",
+  "interpretation": "宽阔暗面衬着浅缓地形，月白亮部随着缓慢转动逐渐浮现。倾斜的断续弧线把空处留给停步，也让倾听与慢慢开口都有位置。",
+  "decisions": [
+    {
+      "intent": "让「留白有序」成为宽阔、可停步的暗面，而不是被装饰填满。",
+      "module": "geometry",
+      "implementation": "采用低起伏的连续地表，关闭次级岩块；深灰底色、灰褐中间色与少量月白亮部形成清晰的明暗边界。"
+    },
+    {
+      "intent": "让浅缓纹理在靠近时才显现，保留「夜行观照」需要的暗处。",
+      "module": "lighting",
+      "implementation": "使用粗哑表面、偏低的环境补光和左上方侧光，不用额外辉光。"
+    },
+    {
+      "intent": "给轮廓一点柔和感，同时不让蓬松云朵盖住想象中的夜径。",
+      "module": "atmosphere",
+      "implementation": "保留微弱的边缘气色，关闭云层。"
+    },
+    {
+      "intent": "用弧线之间的距离呼应「缓缓靠近」：留白并不等于拒绝回应。",
+      "module": "orbits",
+      "implementation": "以倾斜、留有大段空隙的短弧作轨道。"
+    },
+    {
+      "intent": "让亮部逐渐经过地表，使观察与表达都有慢慢展开的时间。",
+      "module": "animation",
+      "implementation": "缓慢自转，保持轻微流动；轨道随整体运动，不设独立节拍。"
+    },
+    {
+      "intent": "把阅读和倾听的线索留给可亲近的陪伴者，不把兴趣铺满星球。",
+      "module": "material",
+      "implementation": "奶蛙采用原有造型与经典装束，只带一本书，名牌写「慢慢」；小图标分散在地表与身旁。"
+    }
+  ],
+  "fallbacks": [
+    {
+      "requested": "沿台地延伸、转弯处留白的月白细径",
+      "substitute": "低起伏连续地表、克制的月白亮部与宽阔暗面",
+      "reason": "渲染器不能绘制或控制一条独立的地表步径；低缓地形与明暗交界只能暗示路径，不能保证出现连续细线。"
+    },
+    {
+      "requested": "只在低处缓缓移动、不遮住路的薄雾",
+      "substitute": "关闭云层，仅保留微弱的大气边缘色",
+      "reason": "可用云层是覆盖星球的蓬松云精灵，无法限定在路径凹处；边缘气色也不是真正的低地薄雾。"
+    },
+    {
+      "requested": "一道从暗面后方掠过且以独立节奏运行的细轨道",
+      "substitute": "倾斜且间隔疏朗的短弧轨道，随整体缓慢运动",
+      "reason": "轨道由预设的多段弧线构成，其运动与星体转速相关，不能指定一条独立、更慢的细轨道。"
+    },
+    {
+      "requested": "微微侧身留座、穿雾灰短披肩并带月白书签的奶蛙",
+      "substitute": "原画奶蛙搭配经典装束、书本配件与「慢慢」名牌",
+      "reason": "此规格只控制奶蛙原画的装束、配件与名牌，不能改变原画坐姿或添加书签造型。"
+    }
+  ],
+  "degraded": false,
+  "meta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_00e54f7a670dece5016ad498e1813c819193e99e7d46e904dd",
+    "usage": {
+      "input_tokens": 5865,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 1687,
+      "output_tokens_details": {
+        "reasoning_tokens": 228
+      },
+      "total_tokens": 7552,
+      "attribution": {
+        "items": {
+          "msg_00e54f7a670dece5016ad498e181788191a09ceb68b981b757": {
+            "input_tokens": 3383,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 3383,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_00e54f7a670dece5016ad498e77df481919f312adf3b67cd85": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 1459,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 1459
+              }
+            ]
+          },
+          "rs_00e54f7a670dece5016ad498e73960819187ab33feb838ca02": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 228
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 1791,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 689,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "profileMeta": {
+    "model": "gpt-6-sol",
+    "responseId": "resp_0382198e2ddd60c9016ad498c062f08191af32165bbe93b76e",
+    "usage": {
+      "input_tokens": 1756,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens": 1624,
+      "output_tokens_details": {
+        "reasoning_tokens": 295
+      },
+      "total_tokens": 3380,
+      "attribution": {
+        "items": {
+          "msg_0382198e2ddd60c9016ad498c0630c8191b34e7d5f97af3629": {
+            "input_tokens": 110,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0,
+            "content": [
+              {
+                "input_tokens": 110,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 0
+              }
+            ]
+          },
+          "msg_0382198e2ddd60c9016ad498c7fafc81919c4902c333b40a66": {
+            "input_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 1329,
+            "content": [
+              {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "output_tokens": 1329
+              }
+            ]
+          },
+          "rs_0382198e2ddd60c9016ad498c7ca548191a15590751a031c85": {
+            "input_tokens": 2,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 295
+          }
+        },
+        "request_fields": {
+          "instructions": {
+            "input_tokens": 1361,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          },
+          "text.format": {
+            "input_tokens": 283,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0,
+            "output_tokens": 0
+          }
+        }
+      }
+    }
+  },
+  "elapsedSeconds": 64
+}

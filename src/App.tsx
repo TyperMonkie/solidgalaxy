@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, ArrowRight, Check, Download, Maximize2, Pause, Play, RotateCcw, Sparkles, X } from 'lucide-react';
 import StoryComposer from './StoryComposer.tsx';
 import { draftCount, draftToContent, emptyDraft } from './ai/draft.ts';
-import { compileUniverse, generateUniverse, type GenerationStage, type Interpretation } from './ai/client.ts';
+import { compileUniverse, generateUniverse, generateMascotArtwork, type GenerationStage, type Interpretation } from './ai/client.ts';
 import { PlanetCore } from './planet/PlanetCore.ts';
 import { createPreset } from './planet/PlanetPresets.ts';
-import { frogImage, paintMascot } from './planet/PlanetMascot.ts';
+import { paintMascotPortrait } from './planet/PlanetMascot.ts';
 import { validateRenderSpec, type LandmarkSpec, type MascotSpec } from './planet/RenderSpec.ts';
 import { LANDMARK_GLYPHS } from './planet/PlanetLandmarks.ts';
 import { DNASchema } from './ai/schemas.ts';
@@ -18,21 +18,27 @@ export default function App(){
   const [about,setAbout]=useState(false),[studio,setStudio]=useState(false),[captureMode,setCaptureMode]=useState(false),[toast,setToast]=useState('');
   const [activeTheme,setActiveTheme]=useState(0);
   const [selectedLandmark,setSelectedLandmark]=useState<LandmarkSpec|null>(null);
+  const [mascotArtwork,setMascotArtwork]=useState<string|null>(null),[artStage,setArtStage]=useState<'idle'|'drawing'|'generated'|'unavailable'>('idle');
+  const artSequence=useRef(0);
   const host=useRef<HTMLDivElement>(null),core=useRef<PlanetCore|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const busy=stage!==null;
   useEffect(()=>{try{const engine=new PlanetCore(host.current!,spec);engine.onMascotSelect=()=>setStudio(true);engine.onLandmarkSelect=setSelectedLandmark;core.current=engine;return()=>{engine.dispose();core.current=null;};}catch(e){setRenderError(e instanceof Error?e.message:'WebGL unavailable');}},[]);
   useEffect(()=>{core.current?.setSpec(spec);core.current?.setPaused(paused);},[spec]);
+  useEffect(()=>{core.current?.setMascotArtwork(mascotArtwork);},[mascotArtwork]);
   useEffect(()=>{core.current?.setPaused(paused);},[paused]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,textarea,select,button'))return;if(e.code==='Space'){e.preventDefault();setPaused(p=>!p);}if(e.key==='Escape')setCaptureMode(false);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
   useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);},[]);
   function notify(text:string){setToast(text);if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>setToast(''),3000);}
   function apply(next:Interpretation){
+    artSequence.current++;const savedArt=next.mascotArtwork?.imageUrl;
+    setMascotArtwork(savedArt&&/^\/api\/mascot-art\/[a-f0-9]{64}\.png$/.test(savedArt)?savedArt:null);setArtStage(savedArt?'generated':'idle');
     setResult(next);setSpec(next.renderSpec);setActiveTheme(0);setError('');
     setPaused(!next.renderSpec.animation.enabled||matchMedia('(prefers-reduced-motion: reduce)').matches);
     history.replaceState(null,'',location.pathname);
   }
-  async function generate(){setStage('profile');setError('');try{const input=draftToContent(draft,crypto.getRandomValues(new Uint32Array(1))[0]);apply(await generateUniverse(input,setStage));notify('你的标签星球与专属奶蛙已生成');}catch(e){setError(e instanceof Error?e.message:'生成失败，请重试。');}finally{setStage(null);}}
-  async function direction(id:string){if(!result||busy||id===result.directionId)return;setStage('compile');setError('');try{apply(await compileUniverse({...result.dna,selectedDirectionId:id}));}catch(e){setError(e instanceof Error?e.message:'视觉生成失败，请重试。');}finally{setStage(null);}}
+  async function drawMascot(world:Interpretation){const sequence=++artSequence.current;setArtStage('drawing');try{const artwork=await generateMascotArtwork(world);if(sequence!==artSequence.current)return;setMascotArtwork(artwork.imageUrl);setArtStage(artwork.status);setResult(current=>current?{...current,mascotArtwork:artwork}:current);}catch{if(sequence===artSequence.current)setArtStage('unavailable');}}
+  async function generate(){setStage('profile');setError('');try{const input=draftToContent(draft,crypto.getRandomValues(new Uint32Array(1))[0]);const world=await generateUniverse(input,setStage);apply(world);void drawMascot(world);notify('星球已生成，正在绘制你的专属角色');}catch(e){setError(e instanceof Error?e.message:'生成失败，请重试。');}finally{setStage(null);}}
+  async function direction(id:string){if(!result||busy||id===result.directionId)return;setStage('compile');setError('');try{const world=await compileUniverse({...result.dna,selectedDirectionId:id});apply(world);void drawMascot(world);}catch(e){setError(e instanceof Error?e.message:'视觉生成失败，请重试。');}finally{setStage(null);}}
   function save(){if(!core.current)return;const a=document.createElement('a');a.href=core.current.capture();a.download=`personaverse-${spec.seed}.png`;a.click();notify('已保存当前星球画面');}
   function exportDNA(){if(!result)return;const url=URL.createObjectURL(new Blob([JSON.stringify({...result,renderSpec:spec},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`personaverse-${spec.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   async function importDNA(file:File|undefined){if(!file)return;try{if(file.size>1024*1024)throw new Error('DNA 文件不能超过 1 MB。');const saved=JSON.parse(await file.text());const dna=DNASchema.parse(saved.dna),renderSpec=validateRenderSpec(saved.renderSpec);if(dna.seed!==renderSpec.seed)throw new Error('DNA 与画面标识不一致。');apply({...saved,dna,renderSpec});notify('已恢复保存的宇宙');}catch{setError('无法导入这份 DNA，请使用当前版本导出的 JSON。');}}
@@ -74,6 +80,7 @@ export default function App(){
         ] as [string,boolean,()=>void][]).map(([label,on,action])=><button key={label} className="module" aria-pressed={on} onClick={action}><span>{label}</span><i className={`switch ${on?'on':''}`}><b/></i></button>)}</div>
         <div className="orbit-choices"><span>星环的另一种表达</span><div>{(['ribbons','dust'] as const).map(type=><button key={type} aria-pressed={spec.orbits.enabled&&spec.orbits.type===type} onClick={()=>setSpec(s=>({...s,orbits:{...s.orbits,enabled:true,type}}))}>{type==='ribbons'?'流光丝带':'星尘点轨'}</button>)}</div></div>
         <button className="frog-about" onClick={()=>setStudio(true)}>✳ 认识这只奶蛙 <ArrowUpRight size={12}/></button>
+        {artStage!=='idle'&&<p className="mascot-image-status" role="status">{artStage==='drawing'?'正在绘制独特形象，星球可以继续探索…':artStage==='generated'?'专属形象已落在你的星球上':'生图暂不可用，当前保留备用装扮。'}</p>}
       </aside>
       <div className="planet-caption"><span className="caption-line"/><div><span className="caption-tag">{result?'YOUR UNIVERSE DNA':'EVERY WORLD STARTS WITH A STORY'}</span><h2>{result?.dna.title||'你的故事，还未抵达'}</h2><p>{result?result.interpretation:'流动的雾、自转的地表、缓缓游移的星带。\n当你分享自己，它们才开始拥有属于你的含义。'}</p></div></div>
       <div className="scene-tools"><button onClick={()=>setPaused(p=>!p)} aria-label={paused?'继续动态':'暂停动态'}>{paused?<Play size={15}/>:<Pause size={15}/>}</button><button onClick={()=>core.current?.resetView()} aria-label="重置视角"><RotateCcw size={15}/></button><button onClick={()=>core.current?.focusMascot()} aria-label="找到奶蛙" title="找到奶蛙"><Sparkles size={15}/></button><span/><button onClick={()=>setCaptureMode(p=>!p)} aria-label="沉浸查看"><Maximize2 size={15}/></button></div>
@@ -84,7 +91,7 @@ export default function App(){
     {toast&&<div className="toast" role="status"><Check size={15}/>{toast}</div>}
     {selectedLandmark&&<div className="modal-backdrop" onClick={()=>setSelectedLandmark(null)}><section className="modal symbol-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="symbol-title"><button className="modal-close" aria-label="关闭符号解读" onClick={()=>setSelectedLandmark(null)}><X size={18}/></button><div className="symbol-hero" style={{color:selectedLandmark.color}}>{LANDMARK_GLYPHS[selectedLandmark.icon]}</div><span className="eyebrow">A LITTLE PIECE OF YOUR WORLD</span><h2 id="symbol-title">{selectedLandmark.label}</h2><p>{selectedLandmark.meaning}</p><p className="privacy-note">{selectedLandmark.placement==='companion'?'奶蛙身边的一个小陪伴':'散落在星球另一处的小发现'} · 来自 {selectedLandmark.evidenceIds.map(id=>id.split(':')[0]).filter((v,i,a)=>a.indexOf(v)===i).map(v=>({posts:'自述与帖子',music:'音乐',images:'图片',interests:'兴趣',videos:'视频信息',otherComments:'他人视角'}[v]||'你分享的内容')).join('、')||'对你分享内容的创意联想'}</p></section></div>}
     {about&&<div className="modal-backdrop" onClick={()=>setAbout(false)}><section className="modal" onClick={e=>e.stopPropagation()}><button className="modal-close" aria-label="关闭" onClick={()=>setAbout(false)}><X size={18}/></button><span className="eyebrow">THE PERSONAVERSE IDEA</span><h2>从你的描述，生长出一个世界。</h2><p>第一阶段综合理解你分享的内容，提炼情绪氛围、兴趣、矛盾与富有想象力的标签，形成 Universe DNA。第二阶段将这些含义翻译成可执行的地表、配色、大气、星带和运动配置。</p><p>标签是可修正的创意理解，不是性格诊断。内部的几何模块只是画笔，每个人的故事决定如何组合它们。当前渲染器的能力仍有限，无法实现的想象会标明视觉折衷。</p><div className="pipeline-mini">你的描述 <ArrowRight size={12}/> 标签与 DNA <ArrowRight size={12}/> 动态星球</div></section></div>}
-    {studio&&<div className="modal-backdrop" onClick={()=>setStudio(false)}><section className="modal mascot-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="mascot-title"><button className="modal-close" aria-label="关闭奶蛙解读" onClick={()=>setStudio(false)}><X size={18}/></button><MascotPortrait spec={spec.mascot}/><span className="eyebrow">YOUR PERSONAL MILKFROG</span><h2 id="mascot-title">{result?'把你的偏爱，穿在身上。':'奶蛙正在等你的故事。'}</h2><p>{spec.mascot.meaning}</p>{spec.mascot.label&&<span className="mascot-badge">{spec.mascot.label}</span>}{result&&<><div className="dna-themes">{result.dna.themes.map((t,i)=><span key={i}>{t.name}</span>)}</div><p>{result.dna.vision}</p></>}<p className="privacy-note">保留你提供的奶蛙原图，AI 选择配件、服饰和名牌，组合成 2.5D 角色。可以在左侧修改素材，重新解读。</p></section></div>}
+    {studio&&<div className="modal-backdrop" onClick={()=>setStudio(false)}><section className="modal mascot-modal" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="mascot-title"><button className="modal-close" aria-label="关闭奶蛙解读" onClick={()=>setStudio(false)}><X size={18}/></button><MascotPortrait spec={spec.mascot} artwork={mascotArtwork}/><span className="eyebrow">YOUR PERSONAL MILKFROG</span><h2 id="mascot-title">{result?'把你的偏爱，穿在身上。':'奶蛙正在等你的故事。'}</h2><p>{spec.mascot.meaning}</p>{spec.mascot.label&&<span className="mascot-badge">{spec.mascot.label}</span>}{result&&<><div className="dna-themes">{result.dna.themes.map((t,i)=><span key={i}>{t.name}</span>)}</div><p>{result.dna.vision}</p><button className="personalize" disabled={artStage==='drawing'} onClick={()=>void drawMascot(result)}><Sparkles size={14}/>{artStage==='drawing'?'正在绘制…':mascotArtwork?'重新绘制专属形象':'生成专属形象'}</button></>}<p className="privacy-note">{mascotArtwork?'角色由你的 Universe DNA 生成，姿态、衣饰和随身物件由整体故事决定。':'当前为备用装扮。专属生图会综合你的情绪、兴趣和标签重新绘制角色；若服务不可用，保留当前装扮。'}</p>{artStage==='unavailable'&&<p className="form-error">生图服务暂不可用，星球与标签仍可正常使用。</p>}</section></div>}
   </div>;
 }
-function MascotPortrait({spec}:{spec:MascotSpec}){const ref=useRef<HTMLCanvasElement>(null);useEffect(()=>{let active=true;void frogImage().then(image=>{if(active&&ref.current)paintMascot(ref.current,image,spec);});return()=>{active=false;};},[spec]);return <canvas className="mascot-portrait" width={1024} height={1200} ref={ref} role="img" aria-label="你的奶蛙装扮"/>;}
+function MascotPortrait({spec,artwork}:{spec:MascotSpec;artwork:string|null}){const ref=useRef<HTMLCanvasElement>(null);useEffect(()=>{const canvas=ref.current!;void paintMascotPortrait(canvas,spec,artwork).catch(()=>paintMascotPortrait(canvas,spec));},[spec,artwork]);return <canvas className="mascot-portrait" width={1024} height={1200} ref={ref} role="img" aria-label="你的奶蛙装扮"/>;}
