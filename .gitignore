@@ -8,3 +8,4 @@ config.toml
 .codex/
 *.log
 coverage/
+*.tsbuildinfo
