@@ -4,9 +4,11 @@ import { CAPABILITY_CATALOG } from '../src/ai/capabilities.ts';
 import { compile, profile } from './pipeline.ts';
 import { ProviderError } from './llm.ts';
 import { generateMascot, MascotRequestSchema, readMascotArt } from './mascot.ts';
+import { socialApi } from './social.ts';
 const MAX_BODY=9*1024*1024;
 let active=0;
 export async function api(req:IncomingMessage,res:ServerResponse){
+ if(await socialApi(req,res))return true;
  const path=req.url?.split('?')[0];if(!path?.startsWith('/api/'))return false;
  const send=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
  if(req.method==='GET'&&path==='/api/health'){send(200,{status:'ready',model:process.env.PERSONAVERSE_MODEL||'gpt-6-sol',capabilityVersion:1});return true;}

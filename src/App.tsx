@@ -9,16 +9,18 @@ import { paintMascotPortrait } from './planet/PlanetMascot.ts';
 import { validateRenderSpec, type LandmarkSpec, type MascotSpec } from './planet/RenderSpec.ts';
 import { LANDMARK_GLYPHS } from './planet/PlanetLandmarks.ts';
 import { DNASchema } from './ai/schemas.ts';
+import type { Resident } from './social/model.ts';
 
-export default function App(){
-  const [spec,setSpec]=useState(()=>{const preview=createPreset('nebula');preview.modules.clouds=true;preview.animation.rotation=.065;preview.animation.flow=.65;return preview;});
+export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resident;onBack?:()=>void;onPublish?:(world:Interpretation)=>Promise<void>}={}){
+  const [spec,setSpec]=useState(()=>{if(initialWorld)return initialWorld.renderSpec;const preview=createPreset('nebula');preview.modules.clouds=true;preview.animation.rotation=.065;preview.animation.flow=.65;return preview;});
   const [paused,setPaused]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [draft,setDraft]=useState(emptyDraft),[result,setResult]=useState<Interpretation|null>(null);
+  const [draft,setDraft]=useState(()=>({...emptyDraft(),description:initialWorld?.bio||'',interests:initialWorld?.source==='demo'?initialWorld.tags:[]})),[result,setResult]=useState<Interpretation|null>(()=>initialWorld?.dna?{dna:initialWorld.dna,renderSpec:initialWorld.renderSpec,directionId:initialWorld.dna.selectedDirectionId,interpretation:initialWorld.dna.vision,decisions:[],fallbacks:[],degraded:false,...(initialWorld.mascotArtwork?{mascotArtwork:{imageUrl:initialWorld.mascotArtwork,status:'generated' as const,message:''}}:{})}:null);
+  const [publishing,setPublishing]=useState(false);
   const [stage,setStage]=useState<GenerationStage|null>(null),[error,setError]=useState(''),[renderError,setRenderError]=useState('');
   const [about,setAbout]=useState(false),[studio,setStudio]=useState(false),[captureMode,setCaptureMode]=useState(false),[toast,setToast]=useState('');
   const [activeTheme,setActiveTheme]=useState(0);
   const [selectedLandmark,setSelectedLandmark]=useState<LandmarkSpec|null>(null);
-  const [mascotArtwork,setMascotArtwork]=useState<string|null>(null),[artStage,setArtStage]=useState<'idle'|'drawing'|'generated'|'unavailable'>('idle');
+  const [mascotArtwork,setMascotArtwork]=useState<string|null>(initialWorld?.mascotArtwork||null),[artStage,setArtStage]=useState<'idle'|'drawing'|'generated'|'unavailable'>(initialWorld?.mascotArtwork?'generated':'idle');
   const artSequence=useRef(0);
   const host=useRef<HTMLDivElement>(null),core=useRef<PlanetCore|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const busy=stage!==null;
@@ -45,7 +47,7 @@ export default function App(){
   const toggle=(key:'atmosphere'|'orbits')=>setSpec(s=>({...s,[key]:{...s[key],enabled:!s[key].enabled}}));
   const theme=result?.dna.themes[activeTheme];
   return <div className={`app identity-app ${captureMode?'capture-mode':''}`} style={{'--accent':spec.material.palette[2]} as React.CSSProperties}>
-    <header className="header"><a className="brand" href="/" aria-label="PersonaVerse 首页"><span className="brand-orbit"><i/></span>PersonaVerse<span className="brand-dot">®</span></a><div className="studio-label"><span/>YOUR WORDS <ArrowRight size={11}/> YOUR WORLD</div><nav><button onClick={()=>setAbout(true)}>关于这颗星球 <ArrowUpRight size={13}/></button></nav></header>
+    <header className="header"><a className="brand" href="/" aria-label="PersonaVerse 首页"><span className="brand-orbit"><i/></span>PersonaVerse<span className="brand-dot">®</span></a><div className="studio-label"><span/>YOUR WORDS <ArrowRight size={11}/> YOUR WORLD</div><nav>{onBack&&<button onClick={onBack}>返回社交宇宙 <ArrowUpRight size={13}/></button>}{onPublish&&<button disabled={!result||result.degraded||busy||publishing} onClick={async()=>{if(!result)return;setPublishing(true);try{await onPublish({...result,renderSpec:spec});}catch(e){setError((e as Error).message);}finally{setPublishing(false);}}}>{publishing?'正在发布…':'发布到宇宙'} <ArrowRight size={13}/></button>}<button onClick={()=>setAbout(true)}>关于这颗星球 <ArrowUpRight size={13}/></button></nav></header>
     <main className="main">
       <div className="ambient-glow"/>
       <section className="intro identity-intro">

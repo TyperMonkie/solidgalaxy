@@ -19,7 +19,7 @@ export function createClouds(s:RenderSpec){
   const material=new ShaderMaterial({transparent:true,depthWrite:false,blending:NormalBlending,
     uniforms:{uTime:{value:0},uPointScale:{value:1},pointTexture:{value:cloudTexture},uColor:{value:new Color('#ffffff').lerp(new Color(s.atmosphere.color),.045)}},
     vertexShader:`attribute float size;uniform float uPointScale;varying vec3 fragPosition;
-      void main(){gl_PointSize=size*uPointScale;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);fragPosition=(modelMatrix*vec4(position,1.)).xyz;}`,
+      void main(){gl_PointSize=size*uPointScale;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);fragPosition=position;}`,
     fragmentShader:noise+`
       uniform float uTime;uniform vec3 uColor;uniform sampler2D pointTexture;varying vec3 fragPosition;
       void main(){vec3 R=normalize(fragPosition);vec3 L=normalize(vec3(-2.8,3.5,3.8));float light=max(.05,dot(R,L));

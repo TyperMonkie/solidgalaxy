@@ -1,6 +1,6 @@
 # PersonaVerse · Architecture B
 
-通过个人描述生成动态标签星球的初版产品。当前工作区原本为空，全部实现放在本目录，没有覆盖 Architecture A。
+通过个人描述生成动态标签星球，并在社交宇宙里探索共鸣的产品原型。当前实现全部放在本目录，没有覆盖 Architecture A。
 
 ```powershell
 cd D:\dotless\architecture-b
@@ -17,9 +17,13 @@ npm start
 
 生产地址：http://127.0.0.1:4173 。`npm run preview` 仅预览静态文件，不提供 AI 接口。
 
-首页通过三类素材面板输入自述/帖子、兴趣/音乐、图片/视频元数据/他人视角，依次调用 Profile Agent 和 Style Compiler，展示个人标签、专属视觉方向、动态星球与一只个性化奶蛙。支持一键填入虚构示例，用于比赛演示。内部三种几何家族保留为编译模块，不再展示固定的 NEBULA / FRACTURE / CRYSTAL 选择入口。
+首页现在是社交宇宙：滚轮在近景 3D 与正交俯视星图间平滑过渡，拖动与惯性边缘平移探索居民；搜索自然语言会定位匹配的星球。查看共鸣信息、建议开场白、互发好友请求，或进入贴近地表的朋友圈。17 位示例居民、介绍与初始帖子均明确标注为虚构。右上角可以切换本机演示身份，体验对方接受请求，未实现真实账号、跨设备登录或在线多人服务。
 
-三类素材可随时切换，已填内容保留在当前页面内存中。生成后可查看标签、切换同一 DNA 的候选视觉方向、修改素材后重新生成，保存 DNA / RenderSpec 与画面。刷新即清空。音频、视频帧分析不在实现范围内。
+朋友圈文本、照片、点赞、好友关系和发布后的星球保存在服务端 `.local/social-universe.json`，刷新与重启后保留；该目录不进 Git。发帖先独立保存，再调用 Profile Agent、Style Compiler 和语义坐标解读更新星球。失败保留原星球，提供重试；分析期间出现新帖会放弃过期结果。光年是三个创意语义维度在场景中的虚拟距离，共鸣指数随距离单调下降，并非真实天文距离或心理测量。示例坐标是手工演示值，成功发布/更新后的坐标才来自 AI。详见 [社交宇宙实现说明](docs/SOCIAL_UNIVERSE.md)。
+
+「星球工作室」保留三类素材面板：自述/帖子、兴趣/音乐、图片/视频元数据/他人视角，依次调用 Profile Agent 和 Style Compiler，展示个人标签、专属视觉方向、动态星球与个性化奶蛙。支持填入虚构示例，用于演示。内部三种几何家族保留为编译模块，不再展示固定的 NEBULA / FRACTURE / CRYSTAL 选择入口。生成后点击「发布到宇宙」保存世界与 DNA；工作室尚未发布的输入草稿仍只存在页面内存。
+
+三类素材可随时切换。生成后可查看标签、切换同一 DNA 的候选视觉方向、修改素材后重新生成，保存或导入 DNA / RenderSpec 与画面。已发布的 DNA 会在重新打开工作室时恢复，输入草稿与尚未发布的修改不会恢复。音频、视频帧分析不在实现范围内。
 
 奶蛙使用用户提供的透明原图，LLM 在验证目录中组合服饰、单件配件和一个文字名牌；保留原图姿态，不生成任意 3D 模型或新姿势。配件支持吉他、耳机、相机、书、手柄；名牌可使用 DNA 中保留的真实输入乐队名。奶蛙随地表转动、始终朝向镜头，背面被星球遮挡；点击角色或“认识这只奶蛙”查看装扮含义。
 
@@ -38,6 +42,8 @@ npm start
 - [对比截图方法](docs/COMPARISON.md)
 - [Profile Agent 提示词](server/prompts/profile-agent.md)
 - [Style Compiler 提示词](server/prompts/style-compiler.md)
+- [社交坐标解读提示词](server/prompts/social-signature.md)
+- [语义导航提示词](server/prompts/social-navigation.md)
 - [第三方许可证](THIRD_PARTY_NOTICES.md)
 
 `npm test` 运行本地契约测试，不调用 LLM。`npx tsx server/smoke.ts` 会实际调用配置的 provider，两阶段使用虚构资料，结果保存到 `docs/ai-smoke-result.json`。

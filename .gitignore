@@ -10,3 +10,4 @@ config.toml
 coverage/
 *.tsbuildinfo
 .cache/
+.local/
