@@ -75,6 +75,8 @@ DNA 包括：版本、seed、title、vision、emotionalAtmosphere、themes、con
 - `flowing`：基于 Greenheck 的连续多尺度地形、盆地与分层山脊。
 - `tectonic`：粗糙地壳、域扭曲的裂隙和与位移一致的局部发光。
 - `faceted`：高细分连续矿物地表、细密层理与矿脉；保留旧枚举以兼容配置，已取消粗三角切面光照。小型矿物端面是可选点缀，默认关闭。
+
+`tectonic` 现由 `geometry.fractures` 的疏密、分流、方向、扰动、宽度、覆盖、深度连续组合，种子展开不规则区域和轴向。旧配置可省略该字段并得到稳定的种子变奏；新 AI 编译必须明确输出，其他家族为 null。实现和实测范围见 `docs/FRACTURE_VARIATION.md`。
 - 轨道可以独立选用 `ribbons`、`broken`、`angular`，无需与几何家族固定绑定。
 - 大气、轨道、结构、光照、动画和后处理可独立配置；装饰星点默认关闭。
 

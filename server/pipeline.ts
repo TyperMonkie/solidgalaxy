@@ -39,6 +39,7 @@ export async function compile(raw:unknown){
    if(output.data.renderSpec.seed!==dna.seed||output.data.directionId!==dna.selectedDirectionId)throw new Error('Compiler must preserve DNA seed and selected direction.');
    const family={nebula:'flowing',fracture:'tectonic',crystal:'faceted'}[output.data.renderSpec.style];
    if(output.data.renderSpec.geometry.type!==family)throw new Error('Style and geometry family must agree.');
+   if((family==='tectonic')!==!!renderSpec.geometry.fractures)throw new Error('Invalid fracture composition: tectonic requires explicit controls, other families require null.');
    if(!output.data.renderSpec.geometry.enabled)throw new Error('Primary geometry must be enabled.');
    if(!output.data.renderSpec.mascot.enabled)throw new Error('Primary geometry requires the milkfrog mascot.');
    const landmarks=renderSpec.landmarks,knownEvidence=new Set([...dna.themes,...dna.contrasts].flatMap(t=>t.evidenceIds));

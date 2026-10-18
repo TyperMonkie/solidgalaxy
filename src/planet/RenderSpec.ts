@@ -1,11 +1,12 @@
 export type Style = 'nebula' | 'fracture' | 'crystal';
+export interface FractureSpec {density:number;branching:number;directionality:number;distortion:number;width:number;coverage:number;depth:number;}
 export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;}
 export interface LandmarkSpec {id:string;icon:'music'|'guitar'|'headphones'|'camera'|'compass'|'mountain'|'book'|'gamepad'|'lightning'|'heart'|'moon'|'chat'|'star'|'wave'|'flower';label:string;meaning:string;color:string;placement:'companion'|'surface';evidenceIds:string[];}
 export interface RenderSpec {
   version: 1;
   style: Style;
   seed: number;
-  geometry: { enabled: boolean; type: 'flowing' | 'tectonic' | 'faceted'; complexity: number; displacement: number };
+  geometry: { enabled: boolean; type: 'flowing' | 'tectonic' | 'faceted'; complexity: number; displacement: number; fractures?:FractureSpec|null };
   material: { palette: [string, string, string]; roughness: number; metalness: number; emission: number };
   atmosphere: { enabled: boolean; color: string; strength: number };
   orbits: { enabled: boolean; type: 'ribbons' | 'broken' | 'angular' | 'dust'; tilt: number };

@@ -31,13 +31,12 @@ void main(){
     color+=uPalette[2]*water*pow(max(current,0.),16.)*.025;
     emission=pow(max(0.,1.-abs(h-.105)*100.),8.)*.035;
   }else if(uStyle<1.5){
-    float gap=fracture(p),crack=1.-smoothstep(.002,.018,gap);
+    vec2 field=fractureField(p);float crack=fractureMask(field);
     float grain=simplex3(p*92.+uSeed)*.12;
     color=mix(uPalette[0],uPalette[1],smoothstep(.04,.38,h))*(.8+grain);
     color=mix(color,uPalette[2]*.22,crack);
     emission=crack*(1.2+.18*sin(uTime*.35+p.y*9.));
-    float hairline=pow(max(0.,1.-abs(simplex3(p*18.))*35.),3.);
-    emission+=hairline*.1*smoothstep(.15,.35,h);
+    emission+=crack*.1*smoothstep(.15,.35,h);
   }else{
     // Layered mineral strata and fine veins, rather than painted low-poly faces.
     vec3 warp=p+vec3(simplex3(p*3.+uSeed),simplex3(p*3.+11.),simplex3(p*3.-7.))*.12;
