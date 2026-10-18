@@ -1,5 +1,6 @@
 import { CompilationSchema, DNASchema, type UniverseDNA, type UserContent } from './schemas.ts';
 import { validateRenderSpec, type RenderSpec } from '../planet/RenderSpec.ts';
+import { apiFetch } from '../public-access.ts';
 
 export interface Interpretation {
   dna: UniverseDNA; renderSpec: RenderSpec; directionId: string; interpretation: string;
@@ -10,7 +11,7 @@ export interface Interpretation {
 export interface MascotArtwork {imageUrl:string|null;status:'generated'|'unavailable';message:string;}
 export type GenerationStage = 'profile' | 'compile';
 async function request(path:string,input:unknown){
-  const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
+  const response=await apiFetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
   const json=await response.json();
   if(!response.ok)throw new Error(json.error||'生成暂未完成，请重试。');
   return json;
@@ -34,7 +35,7 @@ export async function generateUniverse(content:UserContent,onStage?:(stage:Gener
 }
 /** The image task runs after the planet is ready, so a slow image service never blocks exploration. */
 export async function generateMascotArtwork(world:Interpretation):Promise<MascotArtwork>{
-  const response=await fetch('/api/mascot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dna:world.dna,mascot:world.renderSpec.mascot}),signal:AbortSignal.timeout(55000)});
+  const response=await apiFetch('/api/mascot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dna:world.dna,mascot:world.renderSpec.mascot}),signal:AbortSignal.timeout(55000)});
   if(!response.ok)throw new Error('角色生图暂不可用。');
   const data=await response.json();
   if(data.status==='generated'&&typeof data.imageUrl==='string'&&/^\/api\/mascot-art\/[a-f0-9]{64}\.png$/.test(data.imageUrl))return data;

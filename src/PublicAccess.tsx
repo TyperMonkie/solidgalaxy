@@ -1,0 +1,18 @@
+import { useEffect, useState, type FormEvent } from 'react';
+export default function PublicAccess(){
+ const [status,setStatus]=useState<{publicDemo:boolean;unlocked:boolean}|null>(null),[open,setOpen]=useState(false),[code,setCode]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const refresh=()=>fetch('/api/access/status').then(r=>r.ok?r.json():null).then(setStatus).catch(()=>{});
+ useEffect(()=>{void refresh();const show=()=>{setOpen(true);setError('输入体验码后，请再次操作。');};window.addEventListener('personaverse-unlock-required',show);return()=>window.removeEventListener('personaverse-unlock-required',show);},[]);
+ async function unlock(e:FormEvent){e.preventDefault();setBusy(true);setError('');try{
+  const response=await fetch('/api/access/unlock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'暂时无法解锁。');setCode('');await refresh();setOpen(false);
+ }catch(e){setError(e instanceof Error?e.message:'网络连接未完成。');}finally{setBusy(false);}}
+ if(!status?.publicDemo)return null;
+ return <><style>{`
+ .pv-access-pill{position:fixed;left:50%;top:104px;transform:translateX(-50%);z-index:100;background:#0c1722e8;color:#d8e6e6;border:1px solid #354a59;border-radius:24px;padding:9px 17px;font-size:11px;letter-spacing:1px;cursor:pointer;backdrop-filter:blur(12px)}
+ .pv-access-backdrop{position:fixed;inset:0;background:#01060acc;backdrop-filter:blur(8px);z-index:1000;display:grid;place-items:center}.pv-access-panel{position:relative;width:min(420px,calc(100vw - 48px));padding:34px;background:#0b121d;border:1px solid #2e424f;border-radius:20px;color:#e7eeee;box-sizing:border-box;font-family:inherit}
+ .pv-access-panel small{font-size:10px;letter-spacing:3px;color:#8cb5b8}.pv-access-panel h2{font-size:26px;font-weight:400;margin:18px 0}.pv-access-panel p{font-size:13px;line-height:1.8;color:#a7b8bf}.pv-access-panel input{width:100%;box-sizing:border-box;background:#030b13;border:1px solid #425562;border-radius:9px;padding:14px;color:white;outline-offset:4px;margin:10px 0 16px}.pv-access-submit{width:100%;padding:13px;background:#badbd0;border:0;border-radius:9px;color:#102328;cursor:pointer}.pv-access-close{position:absolute;right:18px;top:13px;background:none;border:0;color:#c9d7dc;font-size:25px;cursor:pointer}.pv-access-panel .pv-access-error{color:#e9a791}
+ `}</style><button className="pv-access-pill" onClick={()=>setOpen(true)}>{status.unlocked?'互动已解锁 · 体验会话':'公开展览 · 输入体验码解锁互动'} ↗</button>
+ {open&&<div className="pv-access-backdrop" onClick={()=>setOpen(false)}><section className="pv-access-panel" role="dialog" aria-modal="true" aria-labelledby="pv-access-title" onClick={e=>e.stopPropagation()}><button className="pv-access-close" aria-label="关闭体验码窗口" onClick={()=>setOpen(false)}>×</button><small>PERSONAVERSE / INVITATION</small><h2 id="pv-access-title">{status.unlocked?'欢迎进入你的宇宙。':'给相遇，一点引力。'}</h2>
+ {status.unlocked?<><p>已解锁 AI 生成、发帖与好友互动。公开演示使用共享的虚构居民身份；发出的内容将对其他访客可见。</p><button className="pv-access-submit" onClick={async()=>{await fetch('/api/access/logout',{method:'POST'});await refresh();setOpen(false);}}>结束体验，返回浏览模式</button></>:<form onSubmit={e=>void unlock(e)}><p>星图与星球可直接浏览。输入主办者提供的体验码，即可生成专属星球、发布日记和发送好友请求。</p><label htmlFor="pv-demo-code">体验码</label><input id="pv-demo-code" type="password" autoComplete="off" autoFocus value={code} onChange={e=>setCode(e.target.value)} maxLength={100}/><p>这是共享演示空间，发布的内容会对其他访客可见。</p>{error&&<p className="pv-access-error" role="alert">{error}</p>}<button className="pv-access-submit" disabled={busy||!code.trim()}>{busy?'正在解锁…':'解锁互动 ↗'}</button></form>}</section></div>}</>;
+}

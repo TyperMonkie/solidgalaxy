@@ -7,15 +7,16 @@ import { PostInputSchema, SaveWorldSchema } from '../src/social/model.ts';
 import { interpretSignature, searchResidents } from './social-ai.ts';
 import { compile, profile } from './pipeline.ts';
 import { validateRenderSpec } from '../src/planet/RenderSpec.ts';
+import { allowedOrigin } from './access.ts';
 const updates=new Set<string>();
 const defaultAI={profile,compile,interpretSignature,searchResidents};
 export async function socialApi(req:IncomingMessage,res:ServerResponse,store:SocialStore=socialStore,ai=defaultAI){
  const url=new URL(req.url||'/', 'http://127.0.0.1'),path=url.pathname;if(!path.startsWith('/api/social/'))return false;
  const send=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
- if(req.headers.origin&&!/^http:\/\/(127\.0\.0\.1|localhost):(4173|5173)$/.test(req.headers.origin)){send(403,{error:'不允许的来源。'});return true;}
+ if(!allowedOrigin(req.headers.origin)){send(403,{error:'不允许的来源。'});return true;}
  try{
  const state=await store.read(),id=String(req.headers['x-personaverse-profile']||'you'),me=state.residents.find(r=>r.id===id);if(!me){send(404,{error:'演示身份不存在。'});return true;}
- if(req.method==='GET'&&path==='/api/social/state'){send(200,{...state,meId:id,updating:[...updates]});return true;}
+ if(req.method==='GET'&&path==='/api/social/state'){send(200,{...state,meId:id,updating:[...updates],publicDemo:process.env.PERSONAVERSE_PUBLIC_DEMO==='1'});return true;}
  if(req.method!=='POST'){send(404,{error:'接口不存在。'});return true;}
  const chunks:Buffer[]=[];let size=0;for await(const c of req){size+=c.length;if(size>3500000){send(413,{error:'内容过大，请使用小于 2 MB 的图片。'});return true;}chunks.push(Buffer.from(c));}
  const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
