@@ -39,3 +39,5 @@
 .weather-reading dt{color:#8e9a9c}.weather-reading dd{margin:0;color:#d8e6de}
 .weather-reading .form-error{font-size:11px;line-height:1.7}
 .render-reading>details{border-top:1px solid #ffffff16;padding:9px 0}.render-reading dl{font-size:10px;line-height:1.6}.render-reading dl>div{padding:5px 0}.render-reading dt{color:#9bb4ad;overflow-wrap:anywhere}.render-reading dd{margin:0;color:#dce5df;overflow-wrap:anywhere}.render-reading summary{cursor:pointer}
+
+.climate-add,.climate-region-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0}.climate-add button,.climate-region-tabs button{border:1px solid #ffffff25;border-radius:14px;background:#ffffff08;padding:7px 10px;color:#ccdcd4;font-size:11px;cursor:pointer}.climate-region-tabs button[aria-pressed=true]{border-color:#acc9b9;background:#bdd8ca20}.climate-add button:disabled{opacity:.35;cursor:default}.climate-editor .pt-select input{width:160px;background:#101b1c;color:#d4e3dd;border:1px solid #ffffff20;border-radius:5px;padding:6px}.climate-region-reading{padding:12px 0;border-bottom:1px solid #ffffff13}.climate-region-reading b{font-size:12px}.climate-region-reading small{font-size:10px;color:#8daca3}

@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, BufferGeometry, Color, DirectionalLight, Group, HemisphereLight, Material, Mesh, PerspectiveCamera, Points, Scene, ShaderMaterial, WebGLRenderer, Sprite, Texture, Raycaster, Vector2, Line } from 'three';
+import { ACESFilmicToneMapping, BufferGeometry, Color, DirectionalLight, Group, HemisphereLight, Material, Mesh, PerspectiveCamera, Points, Scene, ShaderMaterial, WebGLRenderer, Sprite, Texture, Raycaster, Vector2, Vector3, Line } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { validateRenderSpec, type RenderSpec } from './RenderSpec.ts';
 import { createPlanetGeometry } from './PlanetGeometry.ts';
@@ -17,6 +17,8 @@ import { createLandmarks } from './PlanetLandmarks.ts';
 import type { LandmarkSpec } from './RenderSpec.ts';
 import { weatherSettings, lightingSettings, bloomSettings } from './ProceduralSettings.ts';
 import { advanceGlobe, motionSettings, mascotAnchor, symbolSettings, updateMascot, backgroundSettings } from './ArtSettings.ts';
+import { createLocalWeather, conformWeatherToSurface } from './PlanetWeather.ts';
+import { weatherAnchor, updateClimateUniforms } from './ClimateField.ts';
 import { cloudPointScale } from './CloudReadout.ts';
 export interface PlanetStats {fps:number;triangles:number;drawCalls:number;vertices:number;renderer:string;frameMs:number;}
 function disposeGroup(group:Group){
@@ -72,7 +74,7 @@ export class PlanetCore {
     if(!forceRebuild&&this.planetSurface&&base(this.spec)===base(spec)){
       // Slider edits update uniforms in place, retaining surface buffers, icons and pose.
       const material=this.planetSurface.material as ShaderMaterial,next=createPlanetMaterial(spec);
-      for(const [key,uniform] of Object.entries(next.uniforms))if(key!=='uTime')material.uniforms[key]=uniform;
+      for(const [key,uniform] of Object.entries(next.uniforms))if(key!=='uTime'){material.uniforms[key]=uniform;for(const weather of this.shaders)if(weather.userData.localWeather&&key in weather.uniforms&&key!=='uColor')weather.uniforms[key]=uniform;}
       next.dispose();
       if(this.cloudLayer&&JSON.stringify(this.spec.weather)!==JSON.stringify(spec.weather)){
         const old=this.cloudLayer;this.globe.remove(old);this.shaders=this.shaders.filter(m=>m!==old.material);old.geometry.dispose();old.material.dispose();
@@ -88,20 +90,22 @@ export class PlanetCore {
     if(spec.orbits.enabled){this.orbit=createOrbits(spec);this.root.add(this.orbit);const materials=new Set<ShaderMaterial>();this.orbit.traverse(o=>{if((o instanceof Mesh||o instanceof Points)&&o.material instanceof ShaderMaterial)materials.add(o.material);});this.shaders.push(...materials);}
     if(spec.structures.enabled&&spec.structures.count>0)this.globe.add(createStructures(spec));
     if(spec.modules.clouds){const clouds=createClouds(spec);this.globe.add(clouds);this.shaders.push(clouds.material);this.cloudLayer=clouds;clouds.rotation.y=this.time*weatherSettings(spec).drift;}
+    const climate=createLocalWeather(spec);if(this.planetSurface)conformWeatherToSurface(climate,this.planetSurface.material as ShaderMaterial);this.globe.add(climate);climate.traverse(o=>{if((o instanceof Mesh||o instanceof Points)&&o.material instanceof ShaderMaterial)this.shaders.push(o.material);});
     if(spec.mascot.enabled){const mascot=createMascot(spec.mascot,this.mascotArtwork);this.globe.add(mascot.group);this.mascotSprite=mascot.sprite;}
     if(spec.landmarks.length){const landmarks=createLandmarks(spec.landmarks,symbolSettings(spec),mascotAnchor(spec.mascot));this.globe.add(landmarks.group);this.landmarkSprites=landmarks.sprites;}
     this.root.add(this.globe);this.rotationLight.intensity=spec.lighting.enabled?spec.lighting.intensity*2:0;this.fill.intensity=spec.lighting.ambient*5;
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,spec.quality==='high'?1.75:spec.quality==='low'?1:1.25));
-    this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=m===this.cloudLayer?.material?this.time:this.time*spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});
+    this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=(m===this.cloudLayer?.material||m.userData.localWeather)?this.time:this.time*spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});
     this.resize();
   }
   setPaused(paused:boolean){this.paused=paused;}
   setMascotArtwork(url:string|null){if(url===this.mascotArtwork)return;this.mascotArtwork=url;this.setSpec(this.spec,true);}
   resetView(){this.camera.position.set(0,.15,6.8);this.controls.target.set(0,0,0);this.controls.update();}
   focusMascot(){if(!this.mascotSprite)return;this.scene.updateMatrixWorld(true);const position=this.mascotSprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(6.2));this.controls.target.set(0,0,0);this.controls.update();}
+  focusWeather(id:string){const r=this.spec.climate?.regions.find(r=>r.id===id);if(!r)return;this.scene.updateMatrixWorld(true);const normal=weatherAnchor(r),side=new Vector3(1,0,0).cross(normal).normalize();const center=this.globe.localToWorld(normal.addScaledVector(side,.7).normalize());this.camera.position.copy(center.normalize().multiplyScalar(5.7));this.controls.target.set(0,0,0);this.controls.update();}
   focusLandmark(id:string){const sprite=this.landmarkSprites.find(s=>s.userData.landmark.id===id);if(!sprite)return;this.scene.updateMatrixWorld(true);const position=sprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(5.5));this.controls.target.set(0,0,0);this.controls.update();}
   /** Same camera, pose and shader time for repeatable cross-preset comparisons. */
-  comparisonPose(){this.resetView();this.time=0;this.globe.rotation.set(.08,-.38,motionSettings(this.spec).axialTilt);this.paused=true;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=0;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=0;});updateOrbitPose(this.orbit,this.spec,0);this.draw();}
+  comparisonPose(){this.resetView();this.time=0;this.globe.rotation.set(.08,-.38,motionSettings(this.spec).axialTilt);this.paused=true;if(this.cloudLayer)this.cloudLayer.rotation.y=0;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=0;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=0;});updateOrbitPose(this.orbit,this.spec,0);this.draw();}
   capture(){this.draw();return this.renderer.domElement.toDataURL('image/png');}
   private mascotPointerDown=(e:PointerEvent)=>{this.pointerDown.set(e.clientX,e.clientY);};
   private mascotPointerUp=(e:PointerEvent)=>{
@@ -115,13 +119,13 @@ export class PlanetCore {
       if(sprite.userData.landmark)this.onLandmarkSelect?.(sprite.userData.landmark);else this.onMascotSelect?.();return;
     }
   };
-  private resize(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);const pixelRatio=this.renderer.getPixelRatio();this.shaders.forEach(m=>{if(m.uniforms.uPointScale)m.uniforms.uPointScale.value=m===this.cloudLayer?.material?cloudPointScale(pixelRatio,h,this.camera.fov):pixelRatio;});this.fx.composer.setPixelRatio(pixelRatio);this.fx.composer.setSize(w,h);}
-  private draw(){this.backdrop.update(this.time,this.camera);if(this.spec.modules.postFX&&this.spec.quality!=='low')this.fx.composer.render();else this.renderer.render(this.scene,this.camera);}
+  private resize(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);const pixelRatio=this.renderer.getPixelRatio();this.shaders.forEach(m=>{if(m.uniforms.uPointScale)m.uniforms.uPointScale.value=(m===this.cloudLayer?.material||m.userData.weatherCloud)?cloudPointScale(pixelRatio,h,this.camera.fov):pixelRatio;});this.fx.composer.setPixelRatio(pixelRatio);this.fx.composer.setSize(w,h);}
+  private draw(){updateClimateUniforms(this.shaders,this.time,this.cloudLayer,!this.paused);this.backdrop.update(this.time,this.camera);if(this.spec.modules.postFX&&this.spec.quality!=='low')this.fx.composer.render();else this.renderer.render(this.scene,this.camera);}
   private animate=(now:number)=>{
     this.frame=requestAnimationFrame(this.animate);
     if(document.hidden){this.previous=now;return;}
     const rawDt=this.previous?(now-this.previous)/1000:0;const dt=Math.min(rawDt,.05);this.previous=now;this.elapsed+=rawDt;
-    if(!this.paused){this.time+=dt;advanceGlobe(this.globe,this.spec,dt);updateOrbitPose(this.orbit,this.spec,this.time);if(this.cloudLayer)this.cloudLayer.rotation.y=this.time*weatherSettings(this.spec).drift;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=m===this.cloudLayer?.material?this.time:this.time*this.spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});}
+    if(!this.paused){this.time+=dt;advanceGlobe(this.globe,this.spec,dt);updateOrbitPose(this.orbit,this.spec,this.time);if(this.cloudLayer)this.cloudLayer.rotation.y=this.time*weatherSettings(this.spec).drift;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=(m===this.cloudLayer?.material||m.userData.localWeather)?this.time:this.time*this.spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});}
     this.renderer.domElement.dataset.motion=JSON.stringify({time:Number(this.time.toFixed(3)),rotation:Number(this.globe.rotation.y.toFixed(4)),paused:this.paused,clouds:this.spec.modules.clouds});
     if(this.mascotSprite){updateMascot(this.mascotSprite,this.spec.mascot,this.time);}
     this.controls.update();const before=performance.now();this.draw();this.frameSum+=performance.now()-before;this.frames++;

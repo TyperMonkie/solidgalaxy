@@ -4,6 +4,8 @@ Source adaptations are described in docs/IMPLEMENTATION_REPORT.md and docs/PRODU
 
 `public/mascot/milkfrog.png` is the user-supplied mascot artwork, included at the user's request. It is not attributed to Greenheck or Three.js. Accessory overlays are drawn locally by this application; no external band logos are included.
 
+Local weather extension (2026-10-19): `PlanetWeather.ts` reuses the existing Greenheck cloud sprite through `CloudTexture.ts` for its regional cloud banks. Terrain attachment executes the existing adapted Greenheck/Ashima field. The new spherical weather masks, precipitation, spiral funnel, lightning, surface effects and semantic/DIY integration are authored in this project. Three.quarks and Three Nebula were reviewed as alternatives but no code or assets from those projects are included; see `docs/LOCAL_WEATHER.md`.
+
 ## dgreenheck-threejs-procedural-planets
 Inspected commit: 23457d4f8e6bedf22aa266e12c92f850822ff3a4
 

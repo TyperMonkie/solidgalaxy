@@ -12,6 +12,7 @@ import { DNASchema } from './ai/schemas.ts';
 import type { Resident } from './social/model.ts';
 import PlanetTuner from './planet/PlanetTuner.tsx';
 import WeatherReading from './planet/WeatherReading.tsx';
+import ClimateEditor, { ClimateReading } from './planet/ClimateEditor.tsx';
 import RenderReading from './planet/RenderReading.tsx';
 
 export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resident;onBack?:()=>void;onPublish?:(world:Interpretation)=>Promise<void>}={}){
@@ -23,7 +24,7 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
   const [stage,setStage]=useState<GenerationStage|null>(null),[error,setError]=useState(''),[renderError,setRenderError]=useState('');
   const [about,setAbout]=useState(false),[studio,setStudio]=useState(false),[captureMode,setCaptureMode]=useState(false),[toast,setToast]=useState('');
   const [activeTheme,setActiveTheme]=useState(0);
-  const [tuning,setTuning]=useState(false);
+  const [tuning,setTuning]=useState(false),[climateTuning,setClimateTuning]=useState(false);
   const [selectedLandmark,setSelectedLandmark]=useState<LandmarkSpec|null>(null);
   const [mascotArtwork,setMascotArtwork]=useState<string|null>(initialWorld?.mascotArtwork||null),[artStage,setArtStage]=useState<'idle'|'drawing'|'generated'|'unavailable'>(initialWorld?.mascotArtwork?'generated':'idle');
   const artSequence=useRef(0);
@@ -81,13 +82,16 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
         </>:<div className="empty-reading"><span className="eyebrow">你的视觉化标签</span><span className="empty-orbit">✳</span><h3>先认识你，<br/>再生成你的世界。</h3><p>输入描述后，AI 会寻找其中的情绪、偏爱和矛盾，组合成一颗有自己气质的动态星球。</p><small>眼前是效果示意，尚未解读你的性格。</small></div>}
         <div className="living-layers"><span className="eyebrow">{manuallyEdited?'手动微调后的世界':renderOrigin==='demo'?'预置示例 · 不是 AI 分析结果':renderOrigin==='preview'?'当前示意世界':renderOrigin==='import'?'导入的星球配置':renderOrigin==='ai'?'本次 AI 编排':spec.weather?'已保存的星球配置':'旧版星球 · 天气使用兼容默认值'}</span><p className="input-note">{spec.modules.clouds?'云层已启用':'澄净无云'} · {spec.orbits.enabled?({ribbons:'流光丝带',dust:'星尘点云',broken:'断裂弧带',angular:'几何轨道'}[spec.orbits.type]):'留白无环'}<br/>{manuallyEdited?'当前数值包含手动修改，下方解读对应修改前的 AI 方案。':renderOrigin==='ai'?'天气、星环与地形来自这次整体解读。':result?'查看留存依据，或按当前解读重新编译。':'分享故事后，由 AI 决定地貌、云、环与光照。'}</p></div>
         <WeatherReading spec={spec} meaning={weatherDecision?`${weatherDecision.intent}：${weatherDecision.implementation}`:undefined}/>
+        <ClimateReading spec={spec} onFocus={id=>core.current?.focusWeather(id)}/>
+        <button className="pt-open" onClick={()=>{setTuning(false);setClimateTuning(true);}}>☀ 局部天气 / 自由 DIY ↗</button>
         <RenderReading spec={spec} result={result} manual={manuallyEdited}/>
         {result&&<button className="pt-open" disabled={busy} onClick={()=>void direction(result.directionId,true)}>{stage==='compile'?'正在重新编译…':'↻ 按当前解读重新编译全部视觉参数'}</button>}
-        <button className="pt-open" onClick={()=>setTuning(true)}>✳ 查看参数 / 手动微调 ↗</button>
+        <button className="pt-open" onClick={()=>{setClimateTuning(false);setTuning(true);}}>✳ 查看参数 / 手动微调 ↗</button>
         {result&&JSON.stringify(spec)!==JSON.stringify(result.renderSpec)&&<button className="pt-open" onClick={()=>setSpec(result.renderSpec)}>↶ 恢复本次 AI 生成参数</button>}
         <button className="frog-about" onClick={()=>setStudio(true)}>✳ 认识这只奶蛙 <ArrowUpRight size={12}/></button>
         {artStage!=='idle'&&<p className="mascot-image-status" role="status">{artStage==='drawing'?'正在绘制独特形象，星球可以继续探索…':artStage==='generated'?'专属形象已落在你的星球上':'生图暂不可用，当前保留备用装扮。'}</p>}
       </aside>
+      {climateTuning&&<aside className="pt-drawer" aria-label="局部天气编辑器"><button className="pt-drawer-close" aria-label="关闭天气编辑器" onClick={()=>setClimateTuning(false)}>×</button><ClimateEditor spec={spec} onChange={setSpec} onFocus={id=>core.current?.focusWeather(id)}/></aside>}
       {tuning&&<aside className="pt-drawer" aria-label="星球地貌与天气编辑器"><button className="pt-drawer-close" aria-label="关闭地貌编辑器" onClick={()=>setTuning(false)}>×</button><PlanetTuner spec={spec} onChange={setSpec}/></aside>}
       <div className="planet-caption"><span className="caption-line"/><div><span className="caption-tag">{result?'YOUR UNIVERSE DNA':'EVERY WORLD STARTS WITH A STORY'}</span><h2>{result?.dna.title||'你的故事，还未抵达'}</h2><p>{result?result.interpretation:'流动的雾、自转的地表、缓缓游移的星带。\n当你分享自己，它们才开始拥有属于你的含义。'}</p></div></div>
       <div className="scene-tools"><button onClick={()=>setPaused(p=>!p)} aria-label={paused?'继续动态':'暂停动态'}>{paused?<Play size={15}/>:<Pause size={15}/>}</button><button onClick={()=>core.current?.resetView()} aria-label="重置视角"><RotateCcw size={15}/></button><button onClick={()=>core.current?.focusMascot()} aria-label="找到奶蛙" title="找到奶蛙"><Sparkles size={15}/></button><span/><button onClick={()=>setCaptureMode(p=>!p)} aria-label="沉浸查看"><Maximize2 size={15}/></button></div>

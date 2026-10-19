@@ -68,6 +68,7 @@ void main(){
     emission=pattern*mix(1.,.5+.5*sin(uTime*.35+p.y*9.),uEmissionPulse);
   }
   float diffuse=max(dot(N,L),0.),rough=mix(uRoughness,uRoughness*.3,water);
+  applyClimateSurface(p,color,rough);
   float specular=pow(max(dot(N,H),.000001),mix(140.,12.,rough))*(1.-rough*.7);
   // Original Greenheck reflection/shininess response, with a safe pow base.
   // Independent controls also preserve roughness and metalness as art inputs.
@@ -79,7 +80,7 @@ void main(){
   vec3 lit=color*(uAmbient+diffuse*uLight)*uLightColor;
   if(!uExplicitLighting)lit+=color*sky*.04;
   lit+=mix(uLightColor,color*uLightColor,uMetalness)*(uExplicitLighting?explicitSpecular:specular*uLight*(uStyle>1.5?.12:.55));
-  lit+=uPalette[2]*emission*uEmission+uRimColor*rim*uRimStrength;
+  lit+=climateSurfaceGlow(p)+uPalette[2]*emission*uEmission+uRimColor*rim*uRimStrength;
   gl_FragColor=vec4(lit,1.);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>

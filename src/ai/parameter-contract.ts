@@ -2,7 +2,7 @@ import type { RenderSpec } from '../planet/RenderSpec.ts';
 import { EXPRESSION_MODULES } from './schemas.ts';
 
 export type ExpressionModule=typeof EXPRESSION_MODULES[number];
-const owners:Record<string,ExpressionModule>={style:'geometry',geometry:'geometry',terrain:'geometry',material:'material',weather:'weather',atmosphere:'atmosphere',orbits:'orbits',structures:'structures',lighting:'lighting',bloom:'bloom',animation:'animation',mascot:'mascot',landmarks:'landmarks',symbols:'landmarks',background:'background','modules.stars':'background','modules.clouds':'weather','modules.postFX':'bloom'};
+const owners:Record<string,ExpressionModule>={style:'geometry',geometry:'geometry',terrain:'geometry',material:'material',weather:'weather',atmosphere:'atmosphere',orbits:'orbits',structures:'structures',lighting:'lighting',bloom:'bloom',animation:'animation',mascot:'mascot',landmarks:'landmarks',symbols:'landmarks',background:'background',climate:'climate','modules.stars':'background','modules.clouds':'weather','modules.postFX':'bloom'};
 const technical:Record<string,string>={version:'配置版本',seed:'可复现的生成标识，不是性格分数',quality:'设备绘制预算，不是性格特征'};
 // Deliberately enumerate fields. Adding a schema field without a renderer owner
 // must fail the contract test, rather than inherit a vague top-level promise.
@@ -21,6 +21,8 @@ const fields:Record<string,string>={
  mascot:'enabled outfit accessory accent label meaning scale latitude longitude bob sway pace',
  'landmarks[]':'id icon label meaning color placement evidenceIds',
  symbols:'scale altitude spread labels',
+ climate:'enabled regions',
+ 'climate.regions[]':'id label meaning kind latitude longitude radius intensity altitude particles particleSize streakLength speed windDirection windStrength turbulence opacity color cloudCoverage cloudColor lightning lightningColor vortexTwist vortexWidth direction surfaceInfluence',
  background:'enabled color starCount starSize brightness twinkle speed colors planets',
  'background.planets[]':'x y depth radius color accent rotation ring',
  modules:'stars clouds postFX',
@@ -29,6 +31,7 @@ const allowed=new Set(['style','landmarks',...Object.entries(fields).flatMap(([r
 export function parameterOwner(path:string){
  if(path in technical)return {technical:technical[path]};
  if(!allowed.has(path))throw new Error(`Unregistered renderer parameter: ${path}`);
+ if(/^climate\.regions\[\]\.(id|meaning)$/.test(path))return {technical:'天气区域标识或生成解释'};
  if(/^(mascot\.meaning|landmarks\[\]\.((id|meaning)|evidenceIds(\[\])?))$/.test(path))return {technical:'解释、证据或内部标识'};
  const module=owners[path.startsWith('modules.')?path:path.split(/[.[]/,1)[0]];
  if(!module)throw new Error(`Unregistered renderer parameter: ${path}`);
@@ -49,4 +52,4 @@ export function schemaParameterPaths(node:any,path=''):string[]{
  if(node.type==='array'&&node.items?.type==='object')return schemaParameterPaths(node.items,path+'[]');
  return [path];
 }
-export const MODULE_CONSUMERS:Record<ExpressionModule,string[]>={geometry:['PlanetGeometry.ts','PlanetMaterial.ts','shaders/terrain.glsl'],material:['PlanetMaterial.ts','shaders/surface.frag.glsl','SurfaceStructures.ts'],weather:['PlanetClouds.ts','CloudReadout.ts'],atmosphere:['PlanetAtmosphere.ts','PlanetMaterial.ts'],orbits:['OrbitalGeometry.ts'],structures:['SurfaceStructures.ts'],lighting:['PlanetMaterial.ts','PlanetClouds.ts','PlanetAtmosphere.ts','PlanetCore.ts','UniverseCore.ts'],bloom:['PlanetPostFX.ts'],animation:['ArtSettings.ts','PlanetCore.ts','UniverseCore.ts'],mascot:['PlanetMascot.ts','ArtSettings.ts'],landmarks:['PlanetLandmarks.ts'],background:['SpaceBackdrop.ts','PlanetCore.ts','UniverseCore.ts']};
+export const MODULE_CONSUMERS:Record<ExpressionModule,string[]>={geometry:['PlanetGeometry.ts','PlanetMaterial.ts','shaders/terrain.glsl'],material:['PlanetMaterial.ts','shaders/surface.frag.glsl','SurfaceStructures.ts'],weather:['PlanetClouds.ts','CloudReadout.ts'],atmosphere:['PlanetAtmosphere.ts','PlanetMaterial.ts'],orbits:['OrbitalGeometry.ts'],structures:['SurfaceStructures.ts'],lighting:['PlanetMaterial.ts','PlanetClouds.ts','PlanetAtmosphere.ts','PlanetCore.ts','UniverseCore.ts'],bloom:['PlanetPostFX.ts'],animation:['ArtSettings.ts','PlanetCore.ts','UniverseCore.ts'],mascot:['PlanetMascot.ts','ArtSettings.ts'],landmarks:['PlanetLandmarks.ts'],background:['SpaceBackdrop.ts','PlanetCore.ts','UniverseCore.ts'],climate:['PlanetWeather.ts','ClimateField.ts','PlanetMaterial.ts','PlanetClouds.ts','PlanetCore.ts','UniverseCore.ts']};

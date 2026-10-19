@@ -7,6 +7,9 @@ export interface TerrainSpec {
  colors:[string,string,string,string,string];transitions:[number,number,number,number];blends:[number,number,number,number];
 }
 export interface WeatherSpec {density:number;opacity:number;scale:number;altitude:number;thickness:number;size?:number;minParticleSize?:number;maxParticleSize?:number;particles:number;speed:number;drift:number;color:string;}
+export type LocalWeatherKind='clear'|'rain'|'storm'|'snow'|'tornado';
+export interface WeatherRegion {id:string;label:string;meaning:string;kind:LocalWeatherKind;latitude:number;longitude:number;radius:number;intensity:number;altitude:number;particles:number;particleSize:number;streakLength:number;speed:number;windDirection:number;windStrength:number;turbulence:number;opacity:number;color:string;cloudCoverage:number;cloudColor:string;lightning:number;lightningColor:string;vortexTwist:number;vortexWidth:number;direction:-1|1;surfaceInfluence:number;}
+export interface ClimateSpec {enabled:boolean;regions:WeatherRegion[];}
 export interface LightingSpec {enabled:boolean;intensity:number;ambient:number;specular?:number;shininess?:number;direction?:[number,number,number];color?:string;}
 export interface BloomSpec {threshold:number;strength:number;radius:number;}
 export interface BackgroundSpec {enabled:boolean;color:string;starCount:number;starSize:number;brightness:number;twinkle:number;speed:number;colors:[string,string,string];planets:{x:number;y:number;depth:number;radius:number;color:string;accent:string;rotation:number;ring:boolean}[];}
@@ -35,6 +38,7 @@ export interface RenderSpec {
   landmarks:LandmarkSpec[];
   terrain?:TerrainSpec;
   weather?:WeatherSpec;
+  climate?:ClimateSpec;
   bloom?:BloomSpec;
   background?:BackgroundSpec;
   symbols?:{scale:number;altitude:number;spread:number;labels:boolean};
@@ -74,6 +78,8 @@ export function validateRenderSpec(input: unknown): RenderSpec {
   if(Array.isArray(anim.axis)&&Math.hypot(...anim.axis as number[])<.001)throw new Error('Invalid zero rotation axis.');
   const terrain=s.terrain as TerrainSpec|undefined;
   if(terrain&&terrain.transitions.some((v,i)=>i>0&&v<terrain.transitions[i-1]))throw new Error('Invalid elevation transition ordering.');
+  const climate=s.climate as ClimateSpec|undefined;
+  if(climate&&new Set(climate.regions.map(r=>r.id)).size!==climate.regions.length)throw new Error('Invalid duplicate weather region IDs.');
   return structuredClone(input) as RenderSpec;
 }
 import { RenderSpecSchema } from '../ai/schemas.ts';
