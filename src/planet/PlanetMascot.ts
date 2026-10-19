@@ -1,3 +1,4 @@
+import { mascotSettings, mascotAnchor } from './ArtSettings.ts';
 import { CanvasTexture, CircleGeometry, Color, Group, Mesh, MeshBasicMaterial, Sprite, SpriteMaterial, SRGBColorSpace, Vector3 } from 'three';
 import type { MascotSpec } from './RenderSpec.ts';
 let imagePromise:Promise<HTMLImageElement>|undefined;
@@ -45,11 +46,12 @@ export function paintMascot(canvas:HTMLCanvasElement,image:HTMLImageElement,s:Ma
  accessory(ctx,s);
 }
 export function createMascot(s:MascotSpec,artwork:string|null=null){
+ const settings=mascotSettings(s);
  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1200;
  const texture=new CanvasTexture(canvas);texture.colorSpace=SRGBColorSpace;
  const material=new SpriteMaterial({map:texture,transparent:true,depthWrite:false});
  const sprite=new Sprite(material);sprite.center.set(.5,.08);sprite.scale.set(.64,.75,1);sprite.name='Personal milkfrog';sprite.renderOrder=5;
- const group=new Group(),anchor=new Vector3(.28,.43,.86).normalize();group.position.copy(anchor).multiplyScalar(1.045);
+ const group=new Group(),anchor=mascotAnchor(s);group.position.copy(anchor).multiplyScalar(1.045);
  const contact=new Mesh(new CircleGeometry(.145,32),new MeshBasicMaterial({color:new Color('#151321'),transparent:true,opacity:.24,depthWrite:false}));contact.quaternion.setFromUnitVectors(new Vector3(0,0,1),anchor);group.add(contact,sprite);
  if(s.label.trim()){
   const badge=document.createElement('canvas');badge.width=768;badge.height=128;const ctx=badge.getContext('2d')!;
@@ -58,5 +60,5 @@ export function createMascot(s:MascotSpec,artwork:string|null=null){
   const map=new CanvasTexture(badge);map.colorSpace=SRGBColorSpace;const nameplate=new Sprite(new SpriteMaterial({map,transparent:true,depthWrite:false}));nameplate.scale.set(.58,.097,1);nameplate.position.set(0,.64,.015);nameplate.renderOrder=6;group.add(nameplate);
  }
  void paintMascotPortrait(canvas,s,artwork).then(()=>{if(texture.userData.released)return;texture.needsUpdate=true;}).catch(()=>{void paintMascotPortrait(canvas,s).then(()=>{if(!texture.userData.released)texture.needsUpdate=true;}).catch(()=>{sprite.visible=false;});});
- return {group,sprite};
+ group.scale.setScalar(settings.scale);return {group,sprite};
 }

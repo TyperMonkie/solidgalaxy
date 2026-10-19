@@ -9,24 +9,26 @@ export interface TerrainSpec {
 export interface WeatherSpec {density:number;opacity:number;scale:number;altitude:number;thickness:number;size?:number;minParticleSize?:number;maxParticleSize?:number;particles:number;speed:number;drift:number;color:string;}
 export interface LightingSpec {enabled:boolean;intensity:number;ambient:number;specular?:number;shininess?:number;direction?:[number,number,number];color?:string;}
 export interface BloomSpec {threshold:number;strength:number;radius:number;}
+export interface BackgroundSpec {enabled:boolean;color:string;starCount:number;starSize:number;brightness:number;twinkle:number;speed:number;colors:[string,string,string];planets:{x:number;y:number;depth:number;radius:number;color:string;accent:string;rotation:number;ring:boolean}[];}
 export interface OrbitSpec {
  enabled:boolean;type:'ribbons'|'broken'|'angular'|'dust';tilt:number;
  radius?:number;width?:number;layers?:number;arc?:number;eccentricity?:number;warp?:number;
  particles?:number;particleSize?:number;opacity?:number;speed?:number;precession?:number;inclination?:number;colors?:[string,string];
+ sides?:number;feather?:number;streamSpeed?:number;twinkle?:number;azimuth?:number;
 }
-export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;}
+export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;scale?:number;latitude?:number;longitude?:number;bob?:number;sway?:number;pace?:number;}
 export interface LandmarkSpec {id:string;icon:'music'|'guitar'|'headphones'|'camera'|'compass'|'mountain'|'book'|'gamepad'|'lightning'|'heart'|'moon'|'chat'|'star'|'wave'|'flower';label:string;meaning:string;color:string;placement:'companion'|'surface';evidenceIds:string[];}
 export interface RenderSpec {
   version: 1;
   style: Style;
   seed: number;
   geometry: { enabled: boolean; type: 'flowing' | 'tectonic' | 'faceted'; complexity: number; displacement: number; fractures?:FractureSpec|null };
-  material: { palette: [string, string, string]; roughness: number; metalness: number; emission: number };
-  atmosphere: { enabled: boolean; color: string; strength: number };
+  material: { palette: [string, string, string]; roughness: number; metalness: number; emission: number;emissionPattern?:'none'|'fissures'|'contours'|'mineral';emissionFrequency?:number;emissionPulse?:number };
+  atmosphere: { enabled: boolean; color: string; strength: number;altitude?:number;falloff?:number;surfaceRim?:number };
   orbits: OrbitSpec;
-  structures: { enabled: boolean; count: number };
+  structures: { enabled: boolean; count: number;kind?:'rock'|'mineral';scale?:number;spread?:number;altitude?:number;elongation?:number };
   lighting: LightingSpec;
-  animation: { enabled: boolean; rotation: number; flow: number };
+  animation: { enabled: boolean; rotation: number; flow: number;axis?:[number,number,number];direction?:-1|1;axialTilt?:number };
   modules: { stars: boolean; clouds: boolean; postFX: boolean };
   quality: 'low' | 'balanced' | 'high';
   mascot:MascotSpec;
@@ -34,6 +36,8 @@ export interface RenderSpec {
   terrain?:TerrainSpec;
   weather?:WeatherSpec;
   bloom?:BloomSpec;
+  background?:BackgroundSpec;
+  symbols?:{scale:number;altitude:number;spread:number;labels:boolean};
 }
 const record = (v: unknown): Record<string, unknown> => {
   if (v === null || typeof v !== 'object' || Array.isArray(v)) throw new Error('RenderSpec requires objects.');
@@ -67,6 +71,7 @@ export function validateRenderSpec(input: unknown): RenderSpec {
   const weather=s.weather as WeatherSpec|undefined;
   if(weather&&weather.minParticleSize!==undefined&&weather.maxParticleSize!==undefined&&weather.minParticleSize>weather.maxParticleSize)throw new Error('Invalid cloud particle size ordering.');
   if(Array.isArray(l.direction)&&Math.hypot(...l.direction as number[])<.001)throw new Error('Invalid zero light direction.');
+  if(Array.isArray(anim.axis)&&Math.hypot(...anim.axis as number[])<.001)throw new Error('Invalid zero rotation axis.');
   const terrain=s.terrain as TerrainSpec|undefined;
   if(terrain&&terrain.transitions.some((v,i)=>i>0&&v<terrain.transitions[i-1]))throw new Error('Invalid elevation transition ordering.');
   return structuredClone(input) as RenderSpec;

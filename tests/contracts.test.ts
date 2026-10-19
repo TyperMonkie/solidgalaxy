@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createPreset } from '../src/planet/PlanetPresets';
 import { validateRenderSpec } from '../src/planet/RenderSpec';
-import { RenderSpecSchema, ContentSchema, DNASchema, ProfileDNASchema, EXPRESSION_MODULES } from '../src/ai/schemas';
+import { RenderSpecSchema, ContentSchema, DNASchema, ProfileDNASchema, EXPRESSION_MODULES, ArtIntentSchema } from '../src/ai/schemas';
 import { sourcePackage, validateDNAIntegrity, compilerInput, validateExpressionCoverage } from '../server/pipeline';
 import { hashSeed, cellsForSeed } from '../src/planet/procedural';
 test('All presets satisfy both the renderer and LLM contract; geometry families differ',()=>{
@@ -20,8 +20,9 @@ test('Reject invented direction IDs and fabricated evidence',()=>{
  const dna={version:1,seed:12,title:'A quiet world',vision:'A world of contrast',emotionalAtmosphere:'Quiet',themes:[{name:'Quiet',interpretation:'One poetic direction',evidenceIds:['posts:0'],confidence:'tentative'}],contrasts:[],motifs:[],directions:[{id:'a',name:'A',vision:'A',composition:'A',motion:'A'},{id:'b',name:'B',vision:'B',composition:'B',motion:'B'}],selectedDirectionId:'a',intensity:.3,uncertainty:'This is a creative interpretation.'};
  const valid=DNASchema.parse(dna);assert.doesNotThrow(()=>validateDNAIntegrity(valid,12,new Set(['posts:0'])));assert.throws(()=>validateDNAIntegrity(valid,13));assert.throws(()=>validateDNAIntegrity(valid,12,new Set(['posts:1'])));assert.throws(()=>validateDNAIntegrity({...valid,selectedDirectionId:'missing'},12));
  assert.equal(ProfileDNASchema.safeParse(valid).success,false,'Legacy DNA remains readable, but a new profile needs an explicit weather intent for every direction');
- assert.equal(ProfileDNASchema.safeParse({...valid,directions:valid.directions.map(d=>({...d,weatherIntent:'局部薄云为缓慢变化的边界留白，而不是对性格的测量。'}))}).success,true);
- assert.deepEqual(Object.keys(compilerInput(valid)).sort(),['capabilities','dna'],'Numeric preset examples must not anchor the compiler');
+ const artIntents=Object.fromEntries(Object.keys(ArtIntentSchema.shape).map(k=>[k,'整体关系的一种视觉表达，允许留白。']));
+ assert.equal(ProfileDNASchema.safeParse({...valid,directions:valid.directions.map(d=>({...d,artIntents,weatherIntent:'局部薄云为缓慢变化的边界留白，而不是对性格的测量。'}))}).success,true);
+ assert.deepEqual(Object.keys(compilerInput(valid)).sort(),['capabilities','dna','moduleConsumers'],'Numeric preset examples must not anchor the compiler');
  assert.throws(()=>validateExpressionCoverage([{module:'geometry'}]),/weather/);
  assert.doesNotThrow(()=>validateExpressionCoverage(EXPRESSION_MODULES.map(module=>({module}))));
 });

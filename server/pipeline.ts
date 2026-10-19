@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { DNASchema, ProfileDNASchema, CompilationSchema, ContentSchema, EXPRESSION_MODULES, type UniverseDNA, type UserContent } from '../src/ai/schemas.ts';
 import { CAPABILITY_CATALOG } from '../src/ai/capabilities.ts';
+import { MODULE_CONSUMERS } from '../src/ai/parameter-contract.ts';
 import { createPreset } from '../src/planet/PlanetPresets.ts';
 import { validateRenderSpec } from '../src/planet/RenderSpec.ts';
 import { hashSeed } from '../src/planet/procedural.ts';
@@ -26,7 +27,7 @@ export async function profile(raw:unknown){
  const output=await structuredCall('universe_dna',ProfileDNASchema,await prompt('profile-agent'),pack,images);
  validateDNAIntegrity(output.data,input.seed,new Set(pack.sources.map(s=>s.id)));return output;
 }
-export function compilerInput(dna:UniverseDNA){return {dna,capabilities:CAPABILITY_CATALOG};}
+export function compilerInput(dna:UniverseDNA){return {dna,capabilities:CAPABILITY_CATALOG,moduleConsumers:MODULE_CONSUMERS};}
 export function validateExpressionCoverage(decisions:{module:string}[]){
  const missing=EXPRESSION_MODULES.filter(module=>!decisions.some(d=>d.module===module));
  if(missing.length)throw new Error(`Invalid expression coverage: missing ${missing.join(', ')}.`);

@@ -1,18 +1,21 @@
 import { AdditiveBlending, BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Group, Mesh, PerspectiveCamera, Points, RingGeometry, ShaderMaterial, SphereGeometry } from 'three';
+import type { RenderSpec } from './RenderSpec.ts';
+import { backgroundSettings } from './ArtSettings.ts';
 import { hashSeed } from './procedural.ts';
 
 /** A camera-relative deep-space set. It stays behind the personal world while it is explored. */
-export function createSpaceBackdrop() {
+export function createSpaceBackdrop(spec?:RenderSpec) {
+  const settings=backgroundSettings(spec),seed=spec?.seed??83921;
   const group = new Group();
   group.name = 'Deep space';
-  const count = 920, positions: number[] = [], colors: number[] = [], sizes: number[] = [], phases: number[] = [];
-  const palette = ['#b8d6ec', '#e8e4cf', '#839dc4', '#c9b7dd', '#e6c99a'].map(c => new Color(c));
+  const count = settings.starCount, positions: number[] = [], colors: number[] = [], sizes: number[] = [], phases: number[] = [];
+  const palette = settings.colors.map(c => new Color(c));
   for (let i = 0; i < count; i++) {
-    positions.push(hashSeed(83921, i * 7) * 2 - 1, hashSeed(83921, i * 7 + 1) * 2 - 1, -25 - hashSeed(83921, i * 7 + 2) * 20);
-    const color = palette[Math.floor(hashSeed(83921, i * 7 + 3) * palette.length)];
+    positions.push(hashSeed(seed, i * 7) * 2 - 1, hashSeed(seed, i * 7 + 1) * 2 - 1, -25 - hashSeed(seed, i * 7 + 2) * 20);
+    const color = palette[Math.floor(hashSeed(seed, i * 7 + 3) * palette.length)];
     colors.push(color.r, color.g, color.b);
-    sizes.push(i < 7 ? 7 + hashSeed(83921, i + 3000) * 6 : .8 + Math.pow(hashSeed(83921, i * 7 + 4), 3) * 2.3);
-    phases.push(hashSeed(83921, i * 7 + 5) * Math.PI * 2);
+    sizes.push(settings.starSize*(i < 7 ? 7 + hashSeed(seed, i + 3000) * 6 : .8 + Math.pow(hashSeed(seed, i * 7 + 4), 3) * 2.3));
+    phases.push(hashSeed(seed, i * 7 + 5) * Math.PI * 2);
   }
   const starGeometry = new BufferGeometry();
   starGeometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -20,23 +23,24 @@ export function createSpaceBackdrop() {
   starGeometry.setAttribute('aSize', new Float32BufferAttribute(sizes, 1));
   starGeometry.setAttribute('aPhase', new Float32BufferAttribute(phases, 1));
   const starMaterial = new ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uAspect: { value: 1 }, uTanFov: { value: Math.tan(35 * Math.PI / 360) } },
+    uniforms: { uTime: { value: 0 },uBrightness:{value:settings.brightness},uTwinkle:{value:settings.twinkle},uSpeed:{value:settings.speed}, uAspect: { value: 1 }, uTanFov: { value: Math.tan(35 * Math.PI / 360) } },
     vertexShader: `attribute vec3 aColor; attribute float aSize; attribute float aPhase;
-      uniform float uTime; uniform float uAspect; uniform float uTanFov;
+      uniform float uTime,uTwinkle,uSpeed; uniform float uAspect; uniform float uTanFov;
       varying vec3 vColor; varying float vGlow; varying float vSize;
       void main(){ vec3 p=position; p.xy*=(-p.z)*uTanFov; p.x*=uAspect;
-        vColor=aColor; vSize=aSize; vGlow=.65+.25*sin(aPhase+uTime*(.19+.1*sin(aPhase)));
+        vColor=aColor; vSize=aSize; vGlow=1.-uTwinkle+uTwinkle*(.5+.5*sin(aPhase+uTime*uSpeed*(.19+.1*sin(aPhase))));
         gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.); gl_PointSize=aSize; }`,
-    fragmentShader: `varying vec3 vColor; varying float vGlow; varying float vSize;
+    fragmentShader: `uniform float uBrightness;varying vec3 vColor; varying float vGlow; varying float vSize;
       void main(){ vec2 p=(gl_PointCoord-.5)*2.; float d=length(p);
         float core=exp(-d*d*(vSize>6.?22.:3.5));
         float halo=exp(-d*d*5.)*.15;
         float cross=exp(-min(abs(p.x),abs(p.y))*48.)*pow(max(0.,1.-d),2.)*.28;
         float a=(core+halo+(vSize>6.?cross:0.))*vGlow;
-        if(a<.012)discard; gl_FragColor=vec4(vColor,a*.82); }`,
+        if(a<.012)discard; gl_FragColor=vec4(vColor,a*.82*uBrightness); }`,
     transparent: true, depthWrite: false, blending: AdditiveBlending,
   });
   const stars = new Points(starGeometry, starMaterial);
+  stars.visible=spec?.background?!!spec.modules.stars:true;
   stars.frustumCulled = false;
   stars.renderOrder = -20;
   group.add(stars);
@@ -60,11 +64,7 @@ export function createSpaceBackdrop() {
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
     }`;
-  const layouts = [
-    { x: -.78, y: .57, z: -23, radius: .49, base: '#243546', accent: '#718a91', seed: 9 },
-    { x: .77, y: .76, z: -28, radius: .33, base: '#4d2d28', accent: '#b58668', seed: 37 },
-    { x: .82, y: -.63, z: -25, radius: .56, base: '#292942', accent: '#a194bf', seed: 69 },
-  ];
+  const layouts=settings.planets.map((p,i)=>({...p,z:-p.depth,base:p.color,seed:seed+i*19}));
   const planets = layouts.map((layout) => {
     const material = new ShaderMaterial({
       uniforms: { uBase: { value: new Color(layout.base) }, uAccent: { value: new Color(layout.accent) }, uSeed: { value: layout.seed } },
@@ -84,10 +84,8 @@ export function createSpaceBackdrop() {
     fragmentShader: `varying vec2 vP; void main(){float r=length(vP);float stripe=.45+.3*sin(r*145.)+.15*sin(r*387.);
       float opacity=smoothstep(.78,.86,r)*(1.-smoothstep(1.18,1.3,r));gl_FragColor=vec4(.43,.43,.57,opacity*stripe*.45);}`,
   });
-  const ring = new Mesh(ringGeometry, ringMaterial);
-  ring.rotation.set(1.19, .22, -.47);
-  ring.renderOrder = -14;
-  group.add(ring);
+  const rings=planets.map((planet,i)=>{if(!layouts[i].ring)return null;const ring=new Mesh(ringGeometry,ringMaterial);ring.rotation.set(1.19,.22,-.47);ring.renderOrder=-14;group.add(ring);return ring;});
+  group.visible=settings.enabled;
 
   return {
     group,
@@ -101,10 +99,9 @@ export function createSpaceBackdrop() {
       planets.forEach((planet, i) => {
         const layout = layouts[i];
         planet.position.set(layout.x * -layout.z * tan * camera.aspect, layout.y * -layout.z * tan, layout.z);
-        planet.rotation.y = time * (.006 + i * .002);
+        planet.rotation.y = time * layout.rotation;
       });
-      ring.position.copy(planets[2].position);
-      ring.scale.setScalar(layouts[2].radius);
+      rings.forEach((ring,i)=>{if(ring){ring.position.copy(planets[i].position);ring.scale.setScalar(layouts[i].radius);}});
     },
     dispose() {
       starGeometry.dispose(); starMaterial.dispose(); sphereGeometry.dispose();

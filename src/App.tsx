@@ -12,6 +12,7 @@ import { DNASchema } from './ai/schemas.ts';
 import type { Resident } from './social/model.ts';
 import PlanetTuner from './planet/PlanetTuner.tsx';
 import WeatherReading from './planet/WeatherReading.tsx';
+import RenderReading from './planet/RenderReading.tsx';
 
 export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resident;onBack?:()=>void;onPublish?:(world:Interpretation)=>Promise<void>}={}){
   const [spec,setSpec]=useState(()=>{if(initialWorld)return initialWorld.renderSpec;const preview=createPreset('nebula');preview.modules.clouds=true;preview.animation.rotation=.065;preview.animation.flow=.65;return preview;});
@@ -80,6 +81,7 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
         </>:<div className="empty-reading"><span className="eyebrow">你的视觉化标签</span><span className="empty-orbit">✳</span><h3>先认识你，<br/>再生成你的世界。</h3><p>输入描述后，AI 会寻找其中的情绪、偏爱和矛盾，组合成一颗有自己气质的动态星球。</p><small>眼前是效果示意，尚未解读你的性格。</small></div>}
         <div className="living-layers"><span className="eyebrow">{manuallyEdited?'手动微调后的世界':renderOrigin==='demo'?'预置示例 · 不是 AI 分析结果':renderOrigin==='preview'?'当前示意世界':renderOrigin==='import'?'导入的星球配置':renderOrigin==='ai'?'本次 AI 编排':spec.weather?'已保存的星球配置':'旧版星球 · 天气使用兼容默认值'}</span><p className="input-note">{spec.modules.clouds?'云层已启用':'澄净无云'} · {spec.orbits.enabled?({ribbons:'流光丝带',dust:'星尘点云',broken:'断裂弧带',angular:'几何轨道'}[spec.orbits.type]):'留白无环'}<br/>{manuallyEdited?'当前数值包含手动修改，下方解读对应修改前的 AI 方案。':renderOrigin==='ai'?'天气、星环与地形来自这次整体解读。':result?'查看留存依据，或按当前解读重新编译。':'分享故事后，由 AI 决定地貌、云、环与光照。'}</p></div>
         <WeatherReading spec={spec} meaning={weatherDecision?`${weatherDecision.intent}：${weatherDecision.implementation}`:undefined}/>
+        <RenderReading spec={spec} result={result} manual={manuallyEdited}/>
         {result&&<button className="pt-open" disabled={busy} onClick={()=>void direction(result.directionId,true)}>{stage==='compile'?'正在重新编译…':'↻ 按当前解读重新编译全部视觉参数'}</button>}
         <button className="pt-open" onClick={()=>setTuning(true)}>✳ 查看参数 / 手动微调 ↗</button>
         {result&&JSON.stringify(spec)!==JSON.stringify(result.renderSpec)&&<button className="pt-open" onClick={()=>setSpec(result.renderSpec)}>↶ 恢复本次 AI 生成参数</button>}

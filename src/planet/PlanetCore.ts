@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, BufferGeometry, DirectionalLight, Group, HemisphereLight, Material, Mesh, PerspectiveCamera, Points, Scene, ShaderMaterial, WebGLRenderer, Sprite, Texture, Raycaster, Vector2, Line } from 'three';
+import { ACESFilmicToneMapping, BufferGeometry, Color, DirectionalLight, Group, HemisphereLight, Material, Mesh, PerspectiveCamera, Points, Scene, ShaderMaterial, WebGLRenderer, Sprite, Texture, Raycaster, Vector2, Line } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { validateRenderSpec, type RenderSpec } from './RenderSpec.ts';
 import { createPlanetGeometry } from './PlanetGeometry.ts';
@@ -16,6 +16,7 @@ import { createMascot } from './PlanetMascot.ts';
 import { createLandmarks } from './PlanetLandmarks.ts';
 import type { LandmarkSpec } from './RenderSpec.ts';
 import { weatherSettings, lightingSettings, bloomSettings } from './ProceduralSettings.ts';
+import { advanceGlobe, motionSettings, mascotAnchor, symbolSettings, updateMascot, backgroundSettings } from './ArtSettings.ts';
 import { cloudPointScale } from './CloudReadout.ts';
 export interface PlanetStats {fps:number;triangles:number;drawCalls:number;vertices:number;renderer:string;frameMs:number;}
 function disposeGroup(group:Group){
@@ -62,6 +63,11 @@ export class PlanetCore {
     if(this.spec.animation.enabled!==spec.animation.enabled)this.paused=!spec.animation.enabled;
     const light=lightingSettings(spec);this.rotationLight.position.set(...light.direction).normalize().multiplyScalar(5);this.rotationLight.color.set(light.color);this.rotationLight.intensity=light.enabled?light.intensity*2:0;this.fill.color.set(light.color);this.fill.intensity=light.ambient*5;
     this.fx.setBloom(bloomSettings(spec));
+    if(!this.root.children.length||JSON.stringify([this.spec.background,this.spec.modules.stars,this.spec.seed])!==JSON.stringify([spec.background,spec.modules.stars,spec.seed])){this.scene.remove(this.backdrop.group);this.backdrop.dispose();this.backdrop=createSpaceBackdrop(spec);this.scene.add(this.backdrop.group);}
+    this.renderer.setClearColor(backgroundSettings(spec).color,spec.background?1:0);
+    // A scene colour clears in the current target's colour space, including
+    // RenderPass's linear buffer. A renderer-only clear can retain sRGB state.
+    this.scene.background=spec.background?new Color(spec.background.color):null;
     const base=(s:RenderSpec)=>JSON.stringify({...s,terrain:undefined,weather:undefined});
     if(!forceRebuild&&this.planetSurface&&base(this.spec)===base(spec)){
       // Slider edits update uniforms in place, retaining surface buffers, icons and pose.
@@ -74,8 +80,8 @@ export class PlanetCore {
       }
       this.spec=spec;this.resize();return;
     }
-    const keepPose=this.root.children.length>0&&this.spec.seed===spec.seed,pose=this.globe.rotation.clone();this.spec=spec;disposeGroup(this.root);this.shaders=[];this.globe=new Group();this.orbit=new Group();this.cloudLayer=null;if(!keepPose)this.time=0;
-    if(keepPose)this.globe.rotation.copy(pose);else this.globe.rotation.set(.08,-.38,-.19);
+    const oldTilt=motionSettings(this.spec).axialTilt,keepPose=this.root.children.length>0&&this.spec.seed===spec.seed,pose=this.globe.rotation.clone();this.spec=spec;disposeGroup(this.root);this.shaders=[];this.globe=new Group();this.orbit=new Group();this.cloudLayer=null;if(!keepPose)this.time=0;
+    if(keepPose){this.globe.rotation.copy(pose);this.globe.rotation.z+=motionSettings(spec).axialTilt-oldTilt;}else this.globe.rotation.set(.08,-.38,motionSettings(spec).axialTilt);
     this.planetSurface=null;this.mascotSprite=null;this.landmarkSprites=[];
     if(spec.geometry.enabled){const surface=createPlanetMaterial(spec);this.planetSurface=new Mesh(createPlanetGeometry(spec),surface);this.globe.add(this.planetSurface);this.shaders.push(surface);}
     if(spec.atmosphere.enabled)this.root.add(createAtmosphere(spec));
@@ -83,7 +89,7 @@ export class PlanetCore {
     if(spec.structures.enabled&&spec.structures.count>0)this.globe.add(createStructures(spec));
     if(spec.modules.clouds){const clouds=createClouds(spec);this.globe.add(clouds);this.shaders.push(clouds.material);this.cloudLayer=clouds;clouds.rotation.y=this.time*weatherSettings(spec).drift;}
     if(spec.mascot.enabled){const mascot=createMascot(spec.mascot,this.mascotArtwork);this.globe.add(mascot.group);this.mascotSprite=mascot.sprite;}
-    if(spec.landmarks.length){const landmarks=createLandmarks(spec.landmarks);this.globe.add(landmarks.group);this.landmarkSprites=landmarks.sprites;}
+    if(spec.landmarks.length){const landmarks=createLandmarks(spec.landmarks,symbolSettings(spec),mascotAnchor(spec.mascot));this.globe.add(landmarks.group);this.landmarkSprites=landmarks.sprites;}
     this.root.add(this.globe);this.rotationLight.intensity=spec.lighting.enabled?spec.lighting.intensity*2:0;this.fill.intensity=spec.lighting.ambient*5;
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,spec.quality==='high'?1.75:spec.quality==='low'?1:1.25));
     this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=m===this.cloudLayer?.material?this.time:this.time*spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});
@@ -95,7 +101,7 @@ export class PlanetCore {
   focusMascot(){if(!this.mascotSprite)return;this.scene.updateMatrixWorld(true);const position=this.mascotSprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(6.2));this.controls.target.set(0,0,0);this.controls.update();}
   focusLandmark(id:string){const sprite=this.landmarkSprites.find(s=>s.userData.landmark.id===id);if(!sprite)return;this.scene.updateMatrixWorld(true);const position=sprite.getWorldPosition(this.camera.position.clone());this.camera.position.copy(position.normalize().multiplyScalar(5.5));this.controls.target.set(0,0,0);this.controls.update();}
   /** Same camera, pose and shader time for repeatable cross-preset comparisons. */
-  comparisonPose(){this.resetView();this.time=0;this.globe.rotation.set(.08,-.38,-.19);this.paused=true;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=0;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=0;});updateOrbitPose(this.orbit,this.spec,0);this.draw();}
+  comparisonPose(){this.resetView();this.time=0;this.globe.rotation.set(.08,-.38,motionSettings(this.spec).axialTilt);this.paused=true;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=0;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=0;});updateOrbitPose(this.orbit,this.spec,0);this.draw();}
   capture(){this.draw();return this.renderer.domElement.toDataURL('image/png');}
   private mascotPointerDown=(e:PointerEvent)=>{this.pointerDown.set(e.clientX,e.clientY);};
   private mascotPointerUp=(e:PointerEvent)=>{
@@ -115,9 +121,9 @@ export class PlanetCore {
     this.frame=requestAnimationFrame(this.animate);
     if(document.hidden){this.previous=now;return;}
     const rawDt=this.previous?(now-this.previous)/1000:0;const dt=Math.min(rawDt,.05);this.previous=now;this.elapsed+=rawDt;
-    if(!this.paused){this.time+=dt;this.globe.rotation.y+=dt*this.spec.animation.rotation;updateOrbitPose(this.orbit,this.spec,this.time);if(this.cloudLayer)this.cloudLayer.rotation.y=this.time*weatherSettings(this.spec).drift;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=m===this.cloudLayer?.material?this.time:this.time*this.spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});}
+    if(!this.paused){this.time+=dt;advanceGlobe(this.globe,this.spec,dt);updateOrbitPose(this.orbit,this.spec,this.time);if(this.cloudLayer)this.cloudLayer.rotation.y=this.time*weatherSettings(this.spec).drift;this.shaders.forEach(m=>{if(m.uniforms.uTime)m.uniforms.uTime.value=m===this.cloudLayer?.material?this.time:this.time*this.spec.animation.flow;if(m.uniforms.uOrbitTime)m.uniforms.uOrbitTime.value=this.time;});}
     this.renderer.domElement.dataset.motion=JSON.stringify({time:Number(this.time.toFixed(3)),rotation:Number(this.globe.rotation.y.toFixed(4)),paused:this.paused,clouds:this.spec.modules.clouds});
-    if(this.mascotSprite){this.mascotSprite.position.y=Math.sin(this.time*1.4)*.009;this.mascotSprite.material.rotation=Math.sin(this.time*.6)*.018;}
+    if(this.mascotSprite){updateMascot(this.mascotSprite,this.spec.mascot,this.time);}
     this.controls.update();const before=performance.now();this.draw();this.frameSum+=performance.now()-before;this.frames++;
     if(this.elapsed>=2){let vertices=0,triangles=0,drawCalls=0;this.scene.traverse(o=>{if(o instanceof Mesh||o instanceof Points){vertices+=o.geometry.attributes.position.count;if(o instanceof Mesh)triangles+=(o.geometry.index?o.geometry.index.count:o.geometry.attributes.position.count)/3*(o instanceof InstancedMesh?o.count:1);drawCalls++;}});const stats={fps:Math.round(this.frames/this.elapsed),triangles,drawCalls,vertices,renderer:'WebGL 2',frameMs:Math.round(this.frameSum/this.frames*10)/10};this.renderer.domElement.dataset.renderStats=JSON.stringify(stats);this.onStats?.(stats);this.frames=0;this.frameSum=0;this.elapsed=0;}
   };

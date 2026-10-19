@@ -7,7 +7,7 @@ export async function structuredCall<T>(name:string,schema:z.ZodType<T>,instruct
  const config=await loadProviderConfig();
  const jsonSchema=z.toJSONSchema(schema);delete (jsonSchema as any).$schema;
  let response:Response;
- try{response=await fetch(`${config.baseUrl}/responses`,{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model:config.model,store:false,instructions,input:[{role:'user',content:[{type:'input_text',text:JSON.stringify(input)},...images]}],text:{format:{type:'json_schema',name,strict:true,schema:jsonSchema}},max_output_tokens:6500}),signal:AbortSignal.timeout(timeoutMs)});}catch{throw new ProviderError('AI provider connection failed or timed out. Please try again.');}
+ try{response=await fetch(`${config.baseUrl}/responses`,{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model:config.model,store:false,instructions,input:[{role:'user',content:[{type:'input_text',text:JSON.stringify(input)},...images]}],text:{format:{type:'json_schema',name,strict:true,schema:jsonSchema}},max_output_tokens:name==='universe_dna'||name==='planet_compilation'?11000:6500}),signal:AbortSignal.timeout(timeoutMs)});}catch{throw new ProviderError('AI provider connection failed or timed out. Please try again.');}
  if(!response.ok){await response.text();throw new ProviderError(`AI provider returned HTTP ${response.status} for ${config.model}. Check model access and Responses/JSON Schema support.`,response.status===401||response.status===403?503:502);}
  const result=await response.json() as any;
  if(result.status&&result.status!=='completed')throw new ProviderError(`AI response did not complete (${result.status}).`);

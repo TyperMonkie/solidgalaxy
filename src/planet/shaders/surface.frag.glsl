@@ -1,3 +1,5 @@
+uniform float uEmissionPattern,uEmissionFrequency,uEmissionPulse;
+uniform vec3 uRimColor;
 uniform float uRoughness,uMetalness,uEmission,uLight,uAmbient;
 uniform vec3 uLightDirection,uLightColor;
 uniform float uSpecular,uShininess,uRimStrength;
@@ -58,7 +60,14 @@ void main(){
     color=mix(color,uPalette[2],deposits*.12+boundary*.06);
     emission=boundary*(.14+.04*sin(uTime*.25+p.y*8.));
   }
-  float diffuse=max(dot(N,L),0.),rough=mix(uRoughness,.17,water);
+  if(uProcedural&&uEmissionPattern>=0.){
+    float pattern=0.;
+    if(uEmissionPattern>.5&&uEmissionPattern<1.5)pattern=fractureMask(fractureField(p));
+    else if(uEmissionPattern>1.5&&uEmissionPattern<2.5)pattern=pow(.5+.5*sin(h*uEmissionFrequency*6.283),18.);
+    else if(uEmissionPattern>2.5)pattern=1.-smoothstep(.015,.08,abs(simplex3(p*uEmissionFrequency+uSeed)));
+    emission=pattern*mix(1.,.5+.5*sin(uTime*.35+p.y*9.),uEmissionPulse);
+  }
+  float diffuse=max(dot(N,L),0.),rough=mix(uRoughness,uRoughness*.3,water);
   float specular=pow(max(dot(N,H),.000001),mix(140.,12.,rough))*(1.-rough*.7);
   // Original Greenheck reflection/shininess response, with a safe pow base.
   // Independent controls also preserve roughness and metalness as art inputs.
@@ -70,7 +79,7 @@ void main(){
   vec3 lit=color*(uAmbient+diffuse*uLight)*uLightColor;
   if(!uExplicitLighting)lit+=color*sky*.04;
   lit+=mix(uLightColor,color*uLightColor,uMetalness)*(uExplicitLighting?explicitSpecular:specular*uLight*(uStyle>1.5?.12:.55));
-  lit+=uPalette[2]*(emission*uEmission+rim*uRimStrength);
+  lit+=uPalette[2]*emission*uEmission+uRimColor*rim*uRimStrength;
   gl_FragColor=vec4(lit,1.);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
