@@ -1,6 +1,6 @@
 import { validateRenderSpec, type RenderSpec, type Style } from './RenderSpec.ts';
 import { fractureForSeed } from './FractureField.ts';
-import { proceduralSettings } from './ProceduralSettings.ts';
+import { proceduralSettings, lightingSettings, orbitSettings, greenheckBloom } from './ProceduralSettings.ts';
 export const PRESET_INFO = {
   nebula: { name: 'NEBULA', subtitle: 'The quiet dreamer', description: 'Soft currents. Boundless possibilities.\nA little mystery, a world of your own.', number: '01', tag: 'FLUID / ATMOSPHERIC', color: '#b7a6ef' },
   fracture: { name: 'FRACTURE', subtitle: 'Beautifully uncontained', description: 'Born from change. Lit from within.\nThere is beauty in breaking the familiar.', number: '02', tag: 'TECTONIC / MOLTEN', color: '#e9a27c' },
@@ -35,5 +35,6 @@ export function createPreset(style: Style, seed = 78291): RenderSpec {
     common.orbits = { enabled: true, type: 'angular', tilt: 0.45 };
     common.structures.count = 0; common.animation = { enabled: true, rotation: 0.028, flow: 0.1 };
   }
+  common.orbits=orbitSettings(common);common.lighting=lightingSettings(common);common.bloom=greenheckBloom();
   return validateRenderSpec(common);
 }

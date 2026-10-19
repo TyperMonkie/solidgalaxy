@@ -27,9 +27,9 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
   const host=useRef<HTMLDivElement>(null),core=useRef<PlanetCore|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const busy=stage!==null;
   useEffect(()=>{try{const engine=new PlanetCore(host.current!,spec);engine.onMascotSelect=()=>setStudio(true);engine.onLandmarkSelect=setSelectedLandmark;core.current=engine;return()=>{engine.dispose();core.current=null;};}catch(e){setRenderError(e instanceof Error?e.message:'WebGL unavailable');}},[]);
-  useEffect(()=>{core.current?.setSpec(spec);core.current?.setPaused(paused);},[spec]);
+  useEffect(()=>{core.current?.setSpec(spec);core.current?.setPaused(paused||!spec.animation.enabled);},[spec]);
   useEffect(()=>{core.current?.setMascotArtwork(mascotArtwork);},[mascotArtwork]);
-  useEffect(()=>{core.current?.setPaused(paused);},[paused]);
+  useEffect(()=>{core.current?.setPaused(paused||!spec.animation.enabled);},[paused]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).matches('input,textarea,select,button'))return;if(e.code==='Space'){e.preventDefault();setPaused(p=>!p);}if(e.key==='Escape')setCaptureMode(false);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
   useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);},[]);
   function notify(text:string){setToast(text);if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>setToast(''),3000);}
@@ -45,7 +45,6 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
   function save(){if(!core.current)return;const a=document.createElement('a');a.href=core.current.capture();a.download=`personaverse-${spec.seed}.png`;a.click();notify('已保存当前星球画面');}
   function exportDNA(){if(!result)return;const url=URL.createObjectURL(new Blob([JSON.stringify({...result,renderSpec:spec},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`personaverse-${spec.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   async function importDNA(file:File|undefined){if(!file)return;try{if(file.size>1024*1024)throw new Error('DNA 文件不能超过 1 MB。');const saved=JSON.parse(await file.text());const dna=DNASchema.parse(saved.dna),renderSpec=validateRenderSpec(saved.renderSpec);if(dna.seed!==renderSpec.seed)throw new Error('DNA 与画面标识不一致。');apply({...saved,dna,renderSpec});notify('已恢复保存的宇宙');}catch{setError('无法导入这份 DNA，请使用当前版本导出的 JSON。');}}
-  const toggle=(key:'atmosphere'|'orbits')=>setSpec(s=>({...s,[key]:{...s[key],enabled:!s[key].enabled}}));
   const theme=result?.dna.themes[activeTheme];
   return <div className={`app identity-app ${captureMode?'capture-mode':''}`} style={{'--accent':spec.material.palette[2]} as React.CSSProperties}>
     <header className="header"><a className="brand" href="/" aria-label="PersonaVerse 首页"><span className="brand-orbit"><i/></span>PersonaVerse<span className="brand-dot">®</span></a><div className="studio-label"><span/>YOUR WORDS <ArrowRight size={11}/> YOUR WORLD</div><nav>{onBack&&<button onClick={onBack}>返回社交宇宙 <ArrowUpRight size={13}/></button>}{onPublish&&<button disabled={!result||result.degraded||busy||publishing} onClick={async()=>{if(!result)return;setPublishing(true);try{await onPublish({...result,renderSpec:spec});}catch(e){setError((e as Error).message);}finally{setPublishing(false);}}}>{publishing?'正在发布…':'发布到宇宙'} <ArrowRight size={13}/></button>}<button onClick={()=>setAbout(true)}>关于这颗星球 <ArrowUpRight size={13}/></button></nav></header>
@@ -75,14 +74,9 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
           {result.degraded&&<p className="form-error">个性化视觉配置未通过校验，当前显示备用示意星球。</p>}
           {result.fallbacks.length>0&&<details className="meaning-details"><summary>当前画面的表达折衷</summary>{result.fallbacks.map((f,i)=><p key={i}>{f.requested} → {f.substitute}。{f.reason}</p>)}</details>}
         </>:<div className="empty-reading"><span className="eyebrow">你的视觉化标签</span><span className="empty-orbit">✳</span><h3>先认识你，<br/>再生成你的世界。</h3><p>输入描述后，AI 会寻找其中的情绪、偏爱和矛盾，组合成一颗有自己气质的动态星球。</p><small>眼前是效果示意，尚未解读你的性格。</small></div>}
-        <button className="pt-open" onClick={()=>setTuning(true)}>✳ 自定义地貌、云海与天气 ↗</button>
-        <div className="living-layers"><span className="eyebrow">让世界流动</span>{([
-          ['自转',!paused,()=>setPaused(p=>!p)],
-          ['蓬松云层',spec.modules.clouds,()=>setSpec(s=>({...s,modules:{...s.modules,clouds:!s.modules.clouds}}))],
-          ['环绕星带',spec.orbits.enabled,()=>toggle('orbits')],
-          ['大气辉光',spec.atmosphere.enabled,()=>toggle('atmosphere')]
-        ] as [string,boolean,()=>void][]).map(([label,on,action])=><button key={label} className="module" aria-pressed={on} onClick={action}><span>{label}</span><i className={`switch ${on?'on':''}`}><b/></i></button>)}</div>
-        <div className="orbit-choices"><span>星环的另一种表达</span><div>{(['ribbons','dust'] as const).map(type=><button key={type} aria-pressed={spec.orbits.enabled&&spec.orbits.type===type} onClick={()=>setSpec(s=>({...s,orbits:{...s.orbits,enabled:true,type}}))}>{type==='ribbons'?'流光丝带':'星尘点轨'}</button>)}</div></div>
+        <div className="living-layers"><span className="eyebrow">{result?'来自这次解读的世界':'当前示意世界'}</span><p className="input-note">{spec.modules.clouds?'云层随风演化':'澄净无云'} · {spec.orbits.enabled?({ribbons:'流光丝带',dust:'星尘点云',broken:'断裂弧带',angular:'几何轨道'}[spec.orbits.type]):'留白无环'}<br/>{result?'云、环、光照与地形均由整体解读编排。':'分享故事后，由 AI 决定地貌、云、环与光照。'}</p></div>
+        <button className="pt-open" onClick={()=>setTuning(true)}>✳ 查看参数 / 手动微调 ↗</button>
+        {result&&JSON.stringify(spec)!==JSON.stringify(result.renderSpec)&&<button className="pt-open" onClick={()=>setSpec(result.renderSpec)}>↶ 恢复本次 AI 生成参数</button>}
         <button className="frog-about" onClick={()=>setStudio(true)}>✳ 认识这只奶蛙 <ArrowUpRight size={12}/></button>
         {artStage!=='idle'&&<p className="mascot-image-status" role="status">{artStage==='drawing'?'正在绘制独特形象，星球可以继续探索…':artStage==='generated'?'专属形象已落在你的星球上':'生图暂不可用，当前保留备用装扮。'}</p>}
       </aside>

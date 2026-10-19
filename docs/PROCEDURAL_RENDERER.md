@@ -1,36 +1,50 @@
-# 连续地貌与天气渲染器（2026-10-19）
+# 完整个性化渲染输入（2026-10-19）
 
-## 来源与改造
+PersonaVerse 的工作流仍是「分类个人素材 → Profile Agent → Universe DNA → Style Compiler → 已校验 RenderSpec → 渲染」。本次只扩展渲染能力与编译合同，保留角色、可发现标签、社交星图、好友与帖子。所有新生成世界必须显式提供完整参数，包括关闭的模块；不再由页面补一组固定云、环或光照。允许云、环、边缘大气、Bloom 缺席，关闭也属于创意选择。
 
-直接适配 [Daniel Greenheck 的 threejs-procedural-planets](https://github.com/dgreenheck/threejs-procedural-planets)，核对版本 `23457d4f8e6bedf22aa266e12c92f850822ff3a4`，MIT。保留完整许可于 `THIRD_PARTY_NOTICES.md`。没有把整个已有项目换名作为 PersonaVerse；复用的是实质性的核心地形和云渲染模块，个人资料理解、结构化编译、角色、星环、社交星图和页面仍由本项目实现。
+## 来源与范围
 
-原先只保留了噪声函数，并把大多数参数写死，三种地貌风格成为主要差异来源。本次恢复原作的 simplex、fractal、ridged 三种噪声基函数及连续幅度、锐度、偏移、尺度、持续度、频率比、层数；同时接入五层海拔颜色、四个分界与融合宽度、实际径向起伏及有限差分凹凸强度/采样距离。它们改变实际位移、海陆分布和表面法线，不只是颜色。
+直接适配 [Daniel Greenheck 的 threejs-procedural-planets](https://github.com/dgreenheck/threejs-procedural-planets)，核对 commit `23457d4f8e6bedf22aa266e12c92f850822ff3a4`，MIT。完整许可见 `THIRD_PARTY_NOTICES.md`。逐项核对 `.local/reference-greenheck/scripts/ui.js` 的所有界面参数；本项目没有复制它的整套页面、天空盒和应用框架。复用核心地形、五层混色、有限差分法线、云精灵算法与 cloud.png，并将原作光照、高光与 Bloom 控制接入产品。
 
-`ProceduralSettings.greenheckTerrain()` 保存原作 main.js 地形默认参数；半径20缩放为1，因此径向比例为 .05。颜色从原作线性RGB转换为本项目十六进制sRGB配置。`greenheck-layers.glsl` 改编原作五层混色。`PlanetMaterial.ts` 将所有控制接入 shader。几何家族枚举保留兼容；有 terrain 对象的新世界统一采用这套连续地貌，tectonic 可叠加裂缝，faceted 可有小型矿物装饰，不再各自强制采用一种写死的地表。
+| 原作参数 | RenderSpec 输入 | 渲染落点 |
+| --- | --- | --- |
+| Type / Amplitude / Sharpness / Offset / Period | terrain.noise / amplitude / sharpness / offset / period | PlanetMaterial → Greenheck terrainHeight；连续海陆分布与实际位移 |
+| Persistence / Lacunarity / Octaves | terrain.persistence / lacunarity / octaves | 分形细节；0 持续度可用，层数扩展到10 |
+| Layer 1–5 RGB | terrain.colors[5] | 五层海拔色；线性RGB默认值转换为sRGB十六进制 |
+| Transition 2–5 / Blend 12–45 | terrain.transitions[4] / blends[4] | 分界与融合；新合同要求分界非递减 |
+| Bump Strength / Offset | terrain.bumpStrength / bumpOffset | 位移法线混合与采样距离，完整 .0001–.1 范围 |
+| Atmosphere Thickness / Radius | weather.thickness / altitude | 球壳厚度 .005–.25，原作半径20规范化为1，云半径为1+altitude |
+| Particle Count | weather.particles | 1–50000；正常画质遵从输入，Eco最多1800 |
+| Min / Max Particle Size | weather.minParticleSize / maxParticleSize | 独立0–200；按种子在区间采样，增加视距/像素比修正 |
+| Density / Opacity / Scale / Speed / RGB | weather.density / opacity / scale / speed / color | 浓淡、透明度、团块尺度、时间演化、颜色；density完整-2–2 |
+| Ambient / Diffuse / Specular / Shininess | lighting.ambient / intensity / specular / shininess | 独立环境光/漫反射/高光0–5与锐度0–25 |
+| Light Direction XYZ / RGB | lighting.direction[3] / color | 非零世界空间光源方向、色彩；同步地表/云/大气边缘/装饰受光 |
+| Bloom Threshold / Strength / Radius | bloom.threshold / strength / radius | UnrealBloomPass；完整0–1 / 0–1 / 0–2范围 |
 
-云层继续直接适配原作 `Atmosphere` 的球壳精灵、原始 cloud.png、simplex密度和受光。新增 density、opacity、scale、altitude、thickness、size、particles、speed、drift、color。scale和球壳尺寸按20倍单位转换；size是参考视距下的像素尺寸，粒子实际大小增加视距修正以适配滚轮和社交镜头。云的演化与风向独立于星环流速，全部遵从总暂停。云仍是精灵近似，不是光线步进体积散射。
+`greenheckTerrain/Weather/Lighting/Bloom()` 保存原作对应默认配置。原作 `fractal3` 在 persistence=0 时有零分母，本次只在该边界使用首层归一值；对已有非零输入保留原算法。sharpness=0 时显式取常量幂，避免0的0次方未定义。高光的pow底数与零方向也加保护。
 
-保留本项目的光照/色调映射、相机、星空与星环，因此“原作参数”恢复的是地形与云配置，不是逐像素复刻原网站。
+这并非逐像素复刻：本项目保留相机、ACES色调映射、自己的背景与星环，地表高光叠加原有粗糙度/金属感，原作五层地貌可叠加我们的裂缝。云依然是原作球壳精灵近似，不是光线步进体积云。极端全云、全平、过亮参数也可能产生不理想画面；参数自由并不等于所有组合都美观。
 
-## 产品集成
+## 本项目扩展的全部输入
 
-- `/?planet-lab=1` 地貌实验室：初始使用原作地貌与云参数。支持同色随机地貌、完整随机参数、算法选择、地貌/天气/色层/自转编辑，以及恢复原作地貌与云参数。
-- 工作室右侧“自定义地貌、云海与天气”可编辑当前人的星球。已生成世界的手动修改随现有DNA导出和发布机制保存。修改不改变 DNA.seed，不假称是 AI 自动推断的修改。
-- `PlanetCore` 在只改地貌/天气时保留地表缓冲区、符号、镜头和旋转姿态；地表只更新uniform，云配置改变时只重建云资源。暂停使用独立状态，不再改写保存的动画配置。
-- 社交远景改用相同地貌材质（低成本网格与层数限制），近景使用完整材质和天气配置，避免靠近时变成另一套条纹球。远景不绘制每颗星球的全部云与装饰。
-- 示例居民视觉版本升级为3，仅更新 source=demo 的已知示例；不覆盖AI/工作室星球、帖子或好友关系。
+- 地形：`terrain.relief` 控制实际起伏；`geometry.fractures` 的 density/branching/directionality/distortion/width/coverage/depth 控制密度、分支、方向、扭曲、宽度、覆盖与深度；palette/emission 控制裂缝颜色/自发光。所有地形家族使用同一连续地形系统。
+- 天气：`modules.clouds` 决定有无；`weather.drift` 独立正负风向；数量、粒子大小与噪声浓淡共同决定云的表现，不强制每颗星球都有雾。
+- 星环：`orbits.enabled/type` 可选无环、纯点云、丝带、断弧、多边形环；radius/width/layers/arc/eccentricity/warp 控制尺度、宽度、层数、弧长、椭圆程度与起伏；particles/particleSize/opacity/colors 控制星尘、尺寸、透明度与两色；tilt/inclination/speed/precession 控制角度、独立正负环绕速度、进动。纯点云不再暗中附带实体丝带。点云数量0–20000，Eco最多2400。
+- 其他：大气边缘有无/颜色/强度、材质粗糙度/金属感、角色与标签、装饰数量、自转/流动/总动态开关仍由合同控制。背景星空是社交场景环境，旧 stars 标记不控制该背景；能力目录明确说明这一兼容字段。
+- Bloom 在工作室与社交近景都遵从编译配置；社交远景为保留星图可读性直接渲染，接近时平滑引入选中星球的辉光。远景不画每颗星球的全部云，星环减少层数/点数但保留类型和形状；近景用保存的画质与配置。
 
-## AI与兼容
+## AI、界面与保存兼容
 
-能力目录升级为v3；Profile Agent 描述大陆、山地和天气关系；Style Compiler 输出 terrain/weather 的全部字段。严格校验字段、范围、五个颜色、四个分界/融合及资源预算。新编译对象必须显式提供 terrain/weather；旧保存对象可以省略，并保留旧渲染分支/云默认值。新地形的 terrain.relief 是主要起伏控制，旧 geometry.displacement 留作兼容。云500–8000点，Eco最多1800；Eco地形最多6层，其他最多10层。位移另有限幅 .32。
+能力目录v4与两阶段提示词描述了这些真实能力。新编译必须提供 terrain/weather/bloom、完整lighting与完整orbits，包含关闭时的参数。拒绝未知组件、越界、零光向量、粒子大小倒置和海拔层序倒置。严格Responses schema每个对象字段必填，使用定长同类数组，避免prefixItems。
 
-使用固定长度的同类数组，避免 tuple 生成的 prefixItems 被严格 Responses schema 拒绝。实际服务测试发现并修复了此兼容问题，没有用备用预设掩盖错误。
+提示词要求根据整份DNA及选定方向共同选择地理、天气、轨道、光照与独立运动，并解释其关系。没有“开放=无云”等关键词字典或客观人格真相主张。原始隐私素材只交给Profile，Compiler接收DNA与能力目录。模型输出还可能趋同，不能仅靠开放参数保证所有人的美术质量。
 
-随机功能采样连续参数，而不是选择三个成品。仍是有限数学算法生成的径向地形，不支持任意拓扑、洞穴、任意新模型或无限风格；极端参数会有平坦海面或浓云遮蔽，这也是开放控制的结果。AI生成质量不能仅由参数差异保证。
+主界面展示本次生成的天气与轨道状态；外部固定开关已收进「查看参数 / 手动微调」。不需用户先开云或选环才生成。手动改动随DNA导出与发布保存，并提供「恢复本次AI生成参数」。生成结果原样应用，云/环关闭和高光/Bloom为0不会被客户端覆盖。`/?studio=1` 是完整产品，`/?planet-lab=1` 仅为独立渲染测试。
+
+旧保存允许缺少新增字段，通过兼容函数得到旧默认值，不偷偷重写它们的人格解读。旧 weather.size 仅作尺寸区间的兼容来源；新AI schema已移除此旧字段，只输出独立min/max。已有星球需重新生成才会得到新的完整个性化参数。quality为low与系统减少动态偏好属于运行预算/可访问性控制，不改变保存的创意配置。
 
 ## 验证
 
-- 27项测试通过，包含旧保存兼容、完整配置JSON往返、新编译字段必填、严格Responses数组兼容、连续参数覆盖、非法参数拒绝与现有社交/访问控制回归。
-- 生产构建通过。浏览器实测原作默认地貌/云，完成同seed、同相机姿态、同配色、暂停下的地貌对照：仅 period 从 .29 改为2，呈现群岛与广阔连续陆地；同一地貌 density 在-1与1之间变化，可从云散尽调到厚云覆盖。最终构建的新检查页无浏览器error日志。
-- 虚构资料经真实 Profile Agent 后，分别编译“留白的潮线”和“云下连山”，均 degraded:false。前者 simplex / offset -.21 / period1.12 / relief .034 / density -.51 / thickness .029；后者 ridged / offset -.08 / period1.17 / relief .094 / density .11 / thickness .067。证明两阶段链路会选择地貌与天气参数，不能据此宣称所有真实用户都明显不同。
-- 本机截图和完整虚构测试结果留在不入Git的 `.local/previews` 与 `.local/procedural-ai-*.json`。本报告不发布凭据或真实个人资料。
+- 29项测试：新合同所有对象字段必填；原作范围端点；旧保存兼容；非法参数阻断；纯点云/带状几何、点数/尺度/独立速度；完整生成链保留无云/无环/无大气和零高光/零Bloom；既有社交/访问控制回归。生产构建通过。
+- 使用先前经真实Profile生成的虚构DNA再次运行两个方向，均 `degraded:false`。薄云方向：3200粒子、尺寸37–86、density=-.49；一层小断弧、radius2.14、width.012、speed.006；暖光方向[-.76,.29,.48]、specular.94；Bloom强度.08。厚云方向：6800粒子、尺寸43–103、density=.28、thickness=.098；无环；光向[.79,.24,.36]、specular.32；Bloom强度0。参数来自真实模型，未人工改成演示答案。
+- 浏览器核验了实际GPU画面：边界参数无云无环、AI厚云地表与原作精灵云、纯点云裂缝组合、宽丝带以及完整工作室。仅记录完成核验的画面；不宣称稳定60fps或5万粒子性能已压测。开发对照和虚构资料结果仅保存在被Git忽略的.local。

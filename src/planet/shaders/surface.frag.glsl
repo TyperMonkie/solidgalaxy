@@ -1,4 +1,7 @@
 uniform float uRoughness,uMetalness,uEmission,uLight,uAmbient;
+uniform vec3 uLightDirection,uLightColor;
+uniform float uSpecular,uShininess,uRimStrength;
+uniform bool uExplicitLighting;
 uniform vec3 uPalette[3];
 uniform mat3 normalMatrix;
 varying vec3 vLocal,vViewPosition;
@@ -16,7 +19,7 @@ void main(){
   if(uProcedural)localNormal=normalize(mix(p,localNormal,uBumpStrength));
   else if(uStyle>1.5)localNormal=normalize(mix(p,localNormal,.25));
   vec3 N=normalize(normalMatrix*localNormal);
-  vec3 V=normalize(-vViewPosition),L=normalize((viewMatrix*vec4(-2.8,3.5,3.8,0.)).xyz),H=normalize(V+L);
+  vec3 V=normalize(-vViewPosition),L=normalize((viewMatrix*vec4(uLightDirection,0.)).xyz),H=normalize(V+L+vec3(.000001));
   vec3 color;float emission=0.,water=0.;
   if(uProcedural){
     color=elevationColor(h);
@@ -56,12 +59,18 @@ void main(){
     emission=boundary*(.14+.04*sin(uTime*.25+p.y*8.));
   }
   float diffuse=max(dot(N,L),0.),rough=mix(uRoughness,.17,water);
-  float specular=pow(max(dot(N,H),0.),mix(140.,12.,rough))*(1.-rough*.7);
+  float specular=pow(max(dot(N,H),.000001),mix(140.,12.,rough))*(1.-rough*.7);
+  // Original Greenheck reflection/shininess response, with a safe pow base.
+  // Independent controls also preserve roughness and metalness as art inputs.
+  float falloff=uProcedural?clamp((uTransitions[1]-h)/max(.0001,uTransitions[1]),0.,1.):1.;
+  float reflected=max(dot(V,reflect(-L,N)),.000001);
+  float explicitSpecular=pow(reflected,uShininess)*uSpecular*mix(.2,1.,falloff)*(1.-rough*.7);
   float sky=max(dot(N,normalize((viewMatrix*vec4(0,1,0,0)).xyz))*.5+.5,0.);
   float rim=pow(1.-max(dot(N,V),0.),4.);
-  vec3 lit=color*(uAmbient+diffuse*uLight)+color*sky*.04;
-  lit+=mix(vec3(.82,.88,1.),color,uMetalness)*specular*uLight*(uStyle>1.5?.12:.55);
-  lit+=uPalette[2]*(emission*uEmission+rim*.065);
+  vec3 lit=color*(uAmbient+diffuse*uLight)*uLightColor;
+  if(!uExplicitLighting)lit+=color*sky*.04;
+  lit+=mix(uLightColor,color*uLightColor,uMetalness)*(uExplicitLighting?explicitSpecular:specular*uLight*(uStyle>1.5?.12:.55));
+  lit+=uPalette[2]*(emission*uEmission+rim*uRimStrength);
   gl_FragColor=vec4(lit,1.);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>

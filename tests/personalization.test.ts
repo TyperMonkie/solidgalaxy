@@ -15,9 +15,10 @@ test('Description becomes validated DNA before compilation; switching direction 
  const dna=DNASchema.parse({...recorded.dna,seed:content.seed});
  const requests:{path:string;body:any}[]=[];
  const phases:string[]=[];
+ const compiled=createPreset('fracture',content.seed);compiled.modules.clouds=false;compiled.orbits.enabled=false;compiled.atmosphere.enabled=false;compiled.lighting.direction=[.2,-.9,.5];compiled.lighting.specular=0;compiled.weather!.minParticleSize=17;compiled.bloom={threshold:.6,strength:0,radius:1.4};
  t.mock.method(globalThis,'fetch',async(path:string,options:RequestInit)=>{
   const body=JSON.parse(options.body as string);requests.push({path,body});
-  return Response.json(path==='/api/profile'?{dna}:{renderSpec:createPreset('fracture',body.seed),directionId:body.selectedDirectionId,interpretation:'A warm world with layered rhythms.',decisions:[{intent:'Shared energy',module:'animation',implementation:'Slow rotation and separate orbital movement.'}],fallbacks:[],degraded:false});
+  return Response.json(path==='/api/profile'?{dna}:{renderSpec:{...compiled,seed:body.seed},directionId:body.selectedDirectionId,interpretation:'A warm world with layered rhythms.',decisions:[{intent:'Shared energy',module:'animation',implementation:'Slow rotation and separate orbital movement.'}],fallbacks:[],degraded:false});
  });
  const result=await generateUniverse(content,p=>phases.push(p));
  assert.deepEqual(phases,['profile','compile']);
@@ -26,6 +27,7 @@ test('Description becomes validated DNA before compilation; switching direction 
  assert.equal(requests[1].body.seed,content.seed);
  assert.equal('posts' in requests[1].body,false,'Compiler must receive DNA rather than original content.');
  assert.equal(result.dna.title,dna.title);
+ assert.deepEqual(result.renderSpec,compiled,'Client must preserve every compiled parameter, including absent cloud/ring/rim and zero highlight/bloom');
  const alternate=dna.directions.find(d=>d.id!==dna.selectedDirectionId)!;
  const revised=await compileUniverse({...dna,selectedDirectionId:alternate.id});
  assert.equal(revised.directionId,alternate.id);

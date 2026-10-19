@@ -6,7 +6,14 @@ export interface TerrainSpec {
  relief:number;bumpStrength:number;bumpOffset:number;
  colors:[string,string,string,string,string];transitions:[number,number,number,number];blends:[number,number,number,number];
 }
-export interface WeatherSpec {density:number;opacity:number;scale:number;altitude:number;thickness:number;size:number;particles:number;speed:number;drift:number;color:string;}
+export interface WeatherSpec {density:number;opacity:number;scale:number;altitude:number;thickness:number;size?:number;minParticleSize?:number;maxParticleSize?:number;particles:number;speed:number;drift:number;color:string;}
+export interface LightingSpec {enabled:boolean;intensity:number;ambient:number;specular?:number;shininess?:number;direction?:[number,number,number];color?:string;}
+export interface BloomSpec {threshold:number;strength:number;radius:number;}
+export interface OrbitSpec {
+ enabled:boolean;type:'ribbons'|'broken'|'angular'|'dust';tilt:number;
+ radius?:number;width?:number;layers?:number;arc?:number;eccentricity?:number;warp?:number;
+ particles?:number;particleSize?:number;opacity?:number;speed?:number;precession?:number;inclination?:number;colors?:[string,string];
+}
 export interface MascotSpec {enabled:boolean;outfit:'classic'|'tour'|'explorer'|'dreamer';accessory:'none'|'guitar'|'headphones'|'camera'|'book'|'gamepad';accent:string;label:string;meaning:string;}
 export interface LandmarkSpec {id:string;icon:'music'|'guitar'|'headphones'|'camera'|'compass'|'mountain'|'book'|'gamepad'|'lightning'|'heart'|'moon'|'chat'|'star'|'wave'|'flower';label:string;meaning:string;color:string;placement:'companion'|'surface';evidenceIds:string[];}
 export interface RenderSpec {
@@ -16,9 +23,9 @@ export interface RenderSpec {
   geometry: { enabled: boolean; type: 'flowing' | 'tectonic' | 'faceted'; complexity: number; displacement: number; fractures?:FractureSpec|null };
   material: { palette: [string, string, string]; roughness: number; metalness: number; emission: number };
   atmosphere: { enabled: boolean; color: string; strength: number };
-  orbits: { enabled: boolean; type: 'ribbons' | 'broken' | 'angular' | 'dust'; tilt: number };
+  orbits: OrbitSpec;
   structures: { enabled: boolean; count: number };
-  lighting: { enabled: boolean; intensity: number; ambient: number };
+  lighting: LightingSpec;
   animation: { enabled: boolean; rotation: number; flow: number };
   modules: { stars: boolean; clouds: boolean; postFX: boolean };
   quality: 'low' | 'balanced' | 'high';
@@ -26,6 +33,7 @@ export interface RenderSpec {
   landmarks:LandmarkSpec[];
   terrain?:TerrainSpec;
   weather?:WeatherSpec;
+  bloom?:BloomSpec;
 }
 const record = (v: unknown): Record<string, unknown> => {
   if (v === null || typeof v !== 'object' || Array.isArray(v)) throw new Error('RenderSpec requires objects.');
@@ -54,8 +62,13 @@ export function validateRenderSpec(input: unknown): RenderSpec {
   m.palette.forEach(color); number(m,'roughness',0.05,1); number(m,'metalness',0,1); number(m,'emission',0,2);
   color(a.color); number(a,'strength',0,1.5); number(o,'tilt',-1.5,1.5); number(f,'count',0,64);
   if (!Number.isInteger(f.count)) throw new Error('Structure count must be an integer.');
-  number(l,'intensity',0,3); number(l,'ambient',0,1); number(anim,'rotation',0,0.2); number(anim,'flow',0,1);
+  number(l,'intensity',0,5); number(l,'ambient',0,5); number(anim,'rotation',0,0.2); number(anim,'flow',0,1);
   for (const k of ['stars','clouds','postFX']) bool(modules,k);
+  const weather=s.weather as WeatherSpec|undefined;
+  if(weather&&weather.minParticleSize!==undefined&&weather.maxParticleSize!==undefined&&weather.minParticleSize>weather.maxParticleSize)throw new Error('Invalid cloud particle size ordering.');
+  if(Array.isArray(l.direction)&&Math.hypot(...l.direction as number[])<.001)throw new Error('Invalid zero light direction.');
+  const terrain=s.terrain as TerrainSpec|undefined;
+  if(terrain&&terrain.transitions.some((v,i)=>i>0&&v<terrain.transitions[i-1]))throw new Error('Invalid elevation transition ordering.');
   return structuredClone(input) as RenderSpec;
 }
 import { RenderSpecSchema } from '../ai/schemas.ts';
