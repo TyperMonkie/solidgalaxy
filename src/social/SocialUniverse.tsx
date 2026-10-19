@@ -12,7 +12,7 @@ const colorOf=(r:Resident)=>r.renderSpec.material.palette[2];
 function project(items:Projection[],refs:globalThis.Map<string,HTMLElement>){for(const p of items){const el=refs.get(p.id);if(el){el.hidden=!p.visible;el.style.transform=`translate3d(${p.x}px,${p.y}px,0)`;}}}
 export default function SocialUniverse(){
  const [data,setData]=useState<StateResponse|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState('');
- const [studio,setStudio]=useState(false),[selected,setSelected]=useState(''),[hovered,setHovered]=useState<string|null>(null);
+ const [studio,setStudio]=useState(()=>new URLSearchParams(location.search).get('studio')==='1'),[selected,setSelected]=useState(''),[hovered,setHovered]=useState<string|null>(null);
  const [mode,setMode]=useState<UniverseMode>('map'),[zoom,setZoom]=useState(92),[engineError,setEngineError]=useState('');
  const [query,setQuery]=useState(''),[searching,setSearching]=useState(false),[results,setResults]=useState<SearchResult|null>(null);
  const [modal,setModal]=useState<'compose'|'friends'|'identity'|'profile'|'history'|null>(null),[openedPost,setOpenedPost]=useState<SocialPost|null>(null);
@@ -24,6 +24,7 @@ export default function SocialUniverse(){
  const posts=data?.posts.filter(p=>p.authorId===resident?.id).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))||[];
  const incoming=data?.friendships.filter(f=>f.to===data.meId&&f.status==='pending')||[];
  const updating=!!me&&(!!data?.updating.includes(me.id)||localRebuild===me.id);
+ useEffect(()=>{const url=new URL(location.href);if(studio)url.searchParams.set('studio','1');else url.searchParams.delete('studio');history.replaceState(null,'',url.pathname+url.search+url.hash);},[studio]);
  async function refresh(){const next=await fetchSocial();if(next.meId!==localIdentity())return;setData(old=>old&&JSON.stringify(old)===JSON.stringify(next)?old:next);}
  useEffect(()=>{void refresh().catch(e=>setError(e.message));const interval=setInterval(()=>{void refresh().catch(()=>{});},4000);return()=>clearInterval(interval);},[]);
  useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(''),5000);return()=>clearTimeout(timer);},[notice]);
@@ -47,7 +48,7 @@ export default function SocialUniverse(){
  if(studio&&me)return <PersonalStudio initialWorld={me} onBack={()=>{setStudio(false);setSelected(me.id);setHovered(null);setMode('map');}} onPublish={saveWorld}/>;
  return <div className={`social-universe su-${mode}`} style={{'--accent':resident?colorOf(resident):'#a6c8e7'} as CSSProperties}>
   <div className="su-scene" ref={host}/><div className="su-vignette"/>
-  <header className="su-header"><a className="brand" href="/" aria-label="PersonaVerse 首页"><span className="brand-orbit"><i/></span>PersonaVerse<span className="brand-dot">®</span></a><nav aria-label="主导航"><a href="/?planet-lab=1" style={{fontSize:11,color:"#a1bdb2"}}>地貌实验室 ↗</a><button className={mode==='map'||mode==='roam'?'active':''} onClick={()=>{core.current?.overview();setMode('map');}}>宇宙漫游</button><button onClick={()=>me&&visit(me.id)}>我的星球</button><button disabled={!me} onClick={()=>setStudio(true)}>星球工作室 <ArrowUpRight size={12}/></button></nav><button className="su-identity" onClick={()=>setModal('identity')}><span className="su-avatar" style={{background:me?colorOf(me):''}}/>{me?.name||'连接宇宙…'}<span className="su-demo">{data?.publicDemo?'共享演示':'本机演示'}</span></button></header>
+  <header className="su-header"><a className="brand" href="/" aria-label="PersonaVerse 首页"><span className="brand-orbit"><i/></span>PersonaVerse<span className="brand-dot">®</span></a><nav aria-label="主导航"><a href="/?planet-lab=1" style={{fontSize:11,color:"#a1bdb2"}}>渲染测试 ↗</a><button className={mode==='map'||mode==='roam'?'active':''} onClick={()=>{core.current?.overview();setMode('map');}}>宇宙漫游</button><button onClick={()=>me&&visit(me.id)}>我的星球</button><button disabled={!me} onClick={()=>setStudio(true)}>星球工作室 <ArrowUpRight size={12}/></button></nav><button className="su-identity" onClick={()=>setModal('identity')}><span className="su-avatar" style={{background:me?colorOf(me):''}}/>{me?.name||'连接宇宙…'}<span className="su-demo">{data?.publicDemo?'共享演示':'本机演示'}</span></button></header>
   {mode!=='feed'&&<aside className="su-explorer">
    <span className="su-kicker">THE GRAVITY OF US <span>✳</span></span><h1>总有一个世界，<br/>与你<em>同频。</em></h1><p className="su-lead">循着一点共鸣，靠近一个人。</p>
    <form className="su-search" onSubmit={e=>void search(e)}><Search size={17}/><input aria-label="搜索宇宙中的人" placeholder="想遇见什么样的人？" maxLength={300} value={query} onChange={e=>setQuery(e.target.value)}/><button disabled={searching||!query.trim()} aria-label="出发搜索">{searching?<LoaderCircle className="su-spin" size={16}/>:<ArrowRight size={17}/>}</button></form>

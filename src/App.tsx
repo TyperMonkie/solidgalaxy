@@ -38,7 +38,6 @@ export default function App({initialWorld,onBack,onPublish}:{initialWorld?:Resid
     setMascotArtwork(savedArt&&/^\/api\/mascot-art\/[a-f0-9]{64}\.png$/.test(savedArt)?savedArt:null);setArtStage(savedArt?'generated':'idle');
     setResult(next);setSpec(next.renderSpec);setActiveTheme(0);setError('');
     setPaused(!next.renderSpec.animation.enabled||matchMedia('(prefers-reduced-motion: reduce)').matches);
-    history.replaceState(null,'',location.pathname);
   }
   async function drawMascot(world:Interpretation){const sequence=++artSequence.current;setArtStage('drawing');try{const artwork=await generateMascotArtwork(world);if(sequence!==artSequence.current)return;setMascotArtwork(artwork.imageUrl);setArtStage(artwork.status);setResult(current=>current?{...current,mascotArtwork:artwork}:current);}catch{if(sequence===artSequence.current)setArtStage('unavailable');}}
   async function generate(){setStage('profile');setError('');try{const input=draftToContent(draft,crypto.getRandomValues(new Uint32Array(1))[0]);const world=await generateUniverse(input,setStage);apply(world);void drawMascot(world);notify('星球已生成，正在绘制你的专属角色');}catch(e){setError(e instanceof Error?e.message:'生成失败，请重试。');}finally{setStage(null);}}
