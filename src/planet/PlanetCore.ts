@@ -16,6 +16,7 @@ import { createMascot } from './PlanetMascot.ts';
 import { createLandmarks } from './PlanetLandmarks.ts';
 import type { LandmarkSpec } from './RenderSpec.ts';
 import { weatherSettings, lightingSettings, bloomSettings } from './ProceduralSettings.ts';
+import { cloudPointScale } from './CloudReadout.ts';
 export interface PlanetStats {fps:number;triangles:number;drawCalls:number;vertices:number;renderer:string;frameMs:number;}
 function disposeGroup(group:Group){
   const geometries=new Set<BufferGeometry>(),materials=new Set<Material>(),textures=new Set<Texture>();
@@ -108,7 +109,7 @@ export class PlanetCore {
       if(sprite.userData.landmark)this.onLandmarkSelect?.(sprite.userData.landmark);else this.onMascotSelect?.();return;
     }
   };
-  private resize(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);const pixelRatio=this.renderer.getPixelRatio();this.shaders.forEach(m=>{if(m.uniforms.uPointScale)m.uniforms.uPointScale.value=m===this.cloudLayer?.material?pixelRatio*Math.max(.5,Math.min(1.4,h/700)):pixelRatio;});this.fx.composer.setPixelRatio(pixelRatio);this.fx.composer.setSize(w,h);}
+  private resize(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);const pixelRatio=this.renderer.getPixelRatio();this.shaders.forEach(m=>{if(m.uniforms.uPointScale)m.uniforms.uPointScale.value=m===this.cloudLayer?.material?cloudPointScale(pixelRatio,h,this.camera.fov):pixelRatio;});this.fx.composer.setPixelRatio(pixelRatio);this.fx.composer.setSize(w,h);}
   private draw(){this.backdrop.update(this.time,this.camera);if(this.spec.modules.postFX&&this.spec.quality!=='low')this.fx.composer.render();else this.renderer.render(this.scene,this.camera);}
   private animate=(now:number)=>{
     this.frame=requestAnimationFrame(this.animate);

@@ -28,6 +28,7 @@ test('Description becomes validated DNA before compilation; switching direction 
  assert.equal('posts' in requests[1].body,false,'Compiler must receive DNA rather than original content.');
  assert.equal(result.dna.title,dna.title);
  assert.deepEqual(result.renderSpec,compiled,'Client must preserve every compiled parameter, including absent cloud/ring/rim and zero highlight/bloom');
+ assert.deepEqual(result.sourceContent,content,'Publish must retain original categorized sources for future post updates');
  const alternate=dna.directions.find(d=>d.id!==dna.selectedDirectionId)!;
  const revised=await compileUniverse({...dna,selectedDirectionId:alternate.id});
  assert.equal(revised.directionId,alternate.id);

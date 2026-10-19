@@ -106,3 +106,21 @@ test('Successful rebuild applies DNA, rendering and coordinates together; studio
  assert.equal((await request('world',{dna:{...dna,seed:spec.seed+1},renderSpec:spec})).status,400);
  },ai as any);
 });
+
+test('Studio source tags/music/photos survive post updates without leaking through public state; visual explanations persist',async()=>{
+ const spec=seedSocialState().residents[0].renderSpec;
+ const dna=DNASchema.parse({version:1,seed:spec.seed,title:'留存测试',vision:'同一人的持续故事',emotionalAtmosphere:'舒展',themes:[{name:'倾听',interpretation:'创意解读',evidenceIds:['posts:0'],confidence:'tentative'}],contrasts:[],motifs:[],directions:[{id:'a',name:'A',vision:'A',composition:'A',motion:'A'},{id:'b',name:'B',vision:'B',composition:'B',motion:'B'}],selectedDirectionId:'a',intensity:.3,uncertainty:'不是诊断。'});
+ const sourceContent={seed:spec.seed,posts:['原始自述'],interests:['用户自选标签'],music:[{title:'测试歌名',artist:'测试作者',metadata:''}],images:[{description:'原始图片说明',dataUrl:'data:image/png;base64,YQ=='}],videos:[],otherComments:[]};
+ const reading={interpretation:'零散云絮留出可见地表',decisions:[{intent:'空间感',module:'weather' as const,implementation:'小云团、低密度与慢风共同保留空隙'}],fallbacks:[],degraded:false};
+ let seen:any;
+ const ai={profile:async(input:unknown)=>{seen=input;return {data:dna};},compile:async()=>({renderSpec:spec,...reading}),interpretSignature:async()=>seedSocialState().residents[0].signature};
+ await localApi(async(request,store)=>{
+  assert.equal((await request('world',{dna,renderSpec:spec,sourceContent,renderReading:reading})).status,200);
+  let resident=(await store.read()).residents[0];assert.deepEqual(resident.renderReading,reading);
+  const publicState=await request('state');assert.equal('privateSources' in publicState.body,false);assert.ok(!JSON.stringify(publicState.body).includes('用户自选标签'));
+  await request('posts',{text:'最新一篇帖子',image:''});assert.equal((await request('rebuild',{})).status,200);
+  assert.deepEqual(seen.interests,sourceContent.interests);assert.deepEqual(seen.music,sourceContent.music);assert.deepEqual(seen.images,sourceContent.images);assert.ok(seen.posts.includes('原始自述')&&seen.posts.includes('最新一篇帖子'));
+  resident=(await store.read()).residents[0];assert.deepEqual(resident.renderReading,reading);
+  assert.equal((await request('world',{dna,renderSpec:spec,sourceContent:{...sourceContent,seed:spec.seed+1}})).status,400);
+ },ai as any);
+});

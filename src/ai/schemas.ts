@@ -9,16 +9,20 @@ export const ContentSchema=z.strictObject({
 });
 export type UserContent=z.infer<typeof ContentSchema>;
 const evidence=z.array(z.string().max(40)).max(12);
+const DirectionSchema=z.strictObject({id:text,name:text,vision:text,composition:text,motion:text,weatherIntent:text.optional()});
 export const DNASchema=z.strictObject({
   version:z.literal(1),seed:z.number().int().min(0).max(4294967295),title:text,vision:text,
   emotionalAtmosphere:text,
   themes:z.array(z.strictObject({name:text,interpretation:text,evidenceIds:evidence,confidence:z.enum(['tentative','supported'])})).min(1).max(7),
   contrasts:z.array(z.strictObject({between:z.array(text).length(2),relationship:text,evidenceIds:evidence})).max(5),
   motifs:z.array(z.strictObject({description:text,meaning:text})).max(10),
-  directions:z.array(z.strictObject({id:text,name:text,vision:text,composition:text,motion:text})).min(2).max(3),
+  directions:z.array(DirectionSchema).min(2).max(3),
   selectedDirectionId:text,intensity:unit,uncertainty:text,
 });
 export type UniverseDNA=z.infer<typeof DNASchema>;
+// Saved DNA stays readable; every NEW profile must make an explicit qualitative
+// weather choice, rather than leaving mist to an incidental adjective.
+export const ProfileDNASchema=DNASchema.extend({directions:z.array(DirectionSchema.required()).min(2).max(3)});
 export const MascotSchema=z.strictObject({enabled:z.boolean(),outfit:z.enum(['classic','tour','explorer','dreamer']),accessory:z.enum(['none','guitar','headphones','camera','book','gamepad']),accent:color,label:z.string().max(48),meaning:z.string().min(1).max(800)});
 export const LandmarkSchema=z.strictObject({id:z.string().min(1).max(32),icon:z.enum(['music','guitar','headphones','camera','compass','mountain','book','gamepad','lightning','heart','moon','chat','star','wave','flower']),label:z.string().min(1).max(20),meaning:z.string().min(1).max(600),color,placement:z.enum(['companion','surface']),evidenceIds:evidence});
 export const FractureSchema=z.strictObject({density:unit,branching:unit,directionality:unit,distortion:unit,width:unit,coverage:unit,depth:unit});
@@ -57,8 +61,11 @@ export const CompiledRenderSpecSchema=RenderSpecSchema.extend({geometry:RenderSp
  if(Math.hypot(...s.lighting.direction)<.001)ctx.addIssue({code:'custom',path:['lighting','direction'],message:'Light direction must be nonzero.'});
  for(let i=1;i<4;i++)if(s.terrain.transitions[i]<s.terrain.transitions[i-1])ctx.addIssue({code:'custom',path:['terrain','transitions'],message:'Elevation transitions must be ordered.'});
 });
+export const EXPRESSION_MODULES=['geometry','material','weather','atmosphere','orbits','structures','lighting','bloom','animation','mascot','landmarks'] as const;
+export const DecisionSchema=z.strictObject({intent:text,module:z.enum(EXPRESSION_MODULES),implementation:text});
+export const RenderReadingSchema=z.strictObject({interpretation:text,decisions:z.array(DecisionSchema).max(14),fallbacks:z.array(z.strictObject({requested:text,substitute:text,reason:text})).max(8),degraded:z.boolean(),manuallyEdited:z.boolean().optional()});
 export const CompilationSchema=z.strictObject({
  renderSpec:CompiledRenderSpecSchema,directionId:text,interpretation:text,
- decisions:z.array(z.strictObject({intent:text,module:z.enum(['geometry','material','atmosphere','orbits','structures','lighting','animation']),implementation:text})).min(1).max(10),
+ decisions:z.array(DecisionSchema).min(1).max(14),
  fallbacks:z.array(z.strictObject({requested:text,substitute:text,reason:text})).max(8),
 });

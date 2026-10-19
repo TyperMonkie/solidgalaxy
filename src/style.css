@@ -34,3 +34,7 @@
 .scene{background:transparent}
 .scene canvas{mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent)}
 .capture-mode .scene canvas{mask-image:none}
+.weather-reading dl{margin:12px 0;display:grid;gap:7px;font-size:11px;font-variant-numeric:tabular-nums}
+.weather-reading dl>div{display:flex;justify-content:space-between;gap:8px}
+.weather-reading dt{color:#8e9a9c}.weather-reading dd{margin:0;color:#d8e6de}
+.weather-reading .form-error{font-size:11px;line-height:1.7}

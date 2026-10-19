@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { DNASchema, RenderSpecSchema } from '../ai/schemas.ts';
+import { DNASchema, RenderSpecSchema, RenderReadingSchema, ContentSchema, type UserContent } from '../ai/schemas.ts';
 import type { UniverseDNA } from '../ai/schemas.ts';
 import type { RenderSpec } from '../planet/RenderSpec.ts';
 export const SignatureSchema=z.strictObject({energy:z.number().min(0).max(1),exploration:z.number().min(0).max(1),warmth:z.number().min(0).max(1),summary:z.string().min(1).max(350)});
 export type Signature=z.infer<typeof SignatureSchema>;
 export interface SocialPost {id:string;authorId:string;text:string;image:string;createdAt:string;likes:string[];}
-export interface Resident {id:string;name:string;bio:string;tags:string[];fictional:boolean;signature:Signature;renderSpec:RenderSpec;dna?:UniverseDNA;mascotArtwork?:string;coordinateStatus?:'pending'|'ready'|'error';worldTitle:string;updatedAt:string;source:'demo'|'ai'|'studio';revision:number;analyzedRevision:number;updateError?:string;}
+export interface Resident {id:string;name:string;bio:string;tags:string[];fictional:boolean;signature:Signature;renderSpec:RenderSpec;dna?:UniverseDNA;renderReading?:z.infer<typeof RenderReadingSchema>;mascotArtwork?:string;coordinateStatus?:'pending'|'ready'|'error';worldTitle:string;updatedAt:string;source:'demo'|'ai'|'studio';revision:number;analyzedRevision:number;updateError?:string;}
 export interface Friendship {id:string;from:string;to:string;status:'pending'|'accepted'|'declined';createdAt:string;}
-export interface SocialState {version:1;demoVisualVersion?:number;residents:Resident[];posts:SocialPost[];friendships:Friendship[];}
+export interface SocialState {version:1;demoVisualVersion?:number;residents:Resident[];posts:SocialPost[];friendships:Friendship[];privateSources?:Record<string,UserContent>;}
 export interface SearchHit {id:string;reason:string;opener:string;}
 export interface SearchResult {hits:SearchHit[];mode:'semantic'|'local';message:string;}
 export const PostInputSchema=z.strictObject({text:z.string().trim().max(2000),image:z.string().max(3000000).regex(/^(data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+)?$/)}).refine(v=>!!v.text||!!v.image,{message:'Write something or attach a picture.'});
-export const SaveWorldSchema=z.strictObject({dna:DNASchema,renderSpec:RenderSpecSchema,mascotArtwork:z.string().regex(/^\/api\/mascot-art\/[a-f0-9]{64}\.png$/).optional()});
+export const SaveWorldSchema=z.strictObject({dna:DNASchema,renderSpec:RenderSpecSchema,renderReading:RenderReadingSchema.optional(),sourceContent:ContentSchema.optional(),mascotArtwork:z.string().regex(/^\/api\/mascot-art\/[a-f0-9]{64}\.png$/).optional()});
 /** Coordinates describe a creative reading, not a psychological measurement. 1 scene unit = 1 LY. */
 export function positionFor(r:Pick<Resident,'signature'>):[number,number,number]{const s=r.signature;return [(s.exploration-.5)*64,(s.energy-.5)*24,(s.warmth-.5)*64];}
 export function distanceLy(a:Pick<Resident,'signature'>,b:Pick<Resident,'signature'>){const p=positionFor(a),q=positionFor(b);return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]);}

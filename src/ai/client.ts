@@ -1,12 +1,15 @@
-import { CompilationSchema, DNASchema, type UniverseDNA, type UserContent } from './schemas.ts';
+import { CompilationSchema, DNASchema, type UniverseDNA, type UserContent, type DecisionSchema } from './schemas.ts';
+import type { z } from 'zod';
 import { validateRenderSpec, type RenderSpec } from '../planet/RenderSpec.ts';
 import { apiFetch } from '../public-access.ts';
 
 export interface Interpretation {
   dna: UniverseDNA; renderSpec: RenderSpec; directionId: string; interpretation: string;
-  decisions: {intent:string;module:string;implementation:string}[];
+  decisions: z.infer<typeof DecisionSchema>[];
   fallbacks: {requested:string;substitute:string;reason:string}[]; degraded: boolean;
   mascotArtwork?: MascotArtwork;
+  sourceContent?: UserContent;
+  manuallyEdited?: boolean;
 }
 export interface MascotArtwork {imageUrl:string|null;status:'generated'|'unavailable';message:string;}
 export type GenerationStage = 'profile' | 'compile';
@@ -31,7 +34,7 @@ export async function generateUniverse(content:UserContent,onStage?:(stage:Gener
   const profile=await request('/api/profile',content),dna=DNASchema.parse(profile.dna);
   if(dna.seed!==content.seed)throw new Error('解读标识不一致，请重试。');
   onStage?.('compile');
-  return compileUniverse(dna);
+  return {...await compileUniverse(dna),sourceContent:content};
 }
 /** The image task runs after the planet is ready, so a slow image service never blocks exploration. */
 export async function generateMascotArtwork(world:Interpretation):Promise<MascotArtwork>{

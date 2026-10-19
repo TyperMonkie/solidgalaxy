@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { loadProviderConfig } from './config.ts';
 export class ProviderError extends Error {constructor(message:string,public status=502){super(message);}}
-export type ImageInput={type:'input_image';image_url:string;detail:'auto'};
+export type ImageInput={type:'input_image';image_url:string;detail:'auto'}|{type:'input_text';text:string};
 /** Responses JSON Schema contract. Credentials and provider bodies never go to the client. */
 export async function structuredCall<T>(name:string,schema:z.ZodType<T>,instructions:string,input:unknown,images:ImageInput[]=[],timeoutMs=120000){
  const config=await loadProviderConfig();
