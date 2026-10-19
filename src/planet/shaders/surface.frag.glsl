@@ -74,12 +74,14 @@ void main(){
   // Independent controls also preserve roughness and metalness as art inputs.
   float falloff=uProcedural?clamp((uTransitions[1]-h)/max(.0001,uTransitions[1]),0.,1.):1.;
   float reflected=max(dot(V,reflect(-L,N)),.000001);
-  float explicitSpecular=pow(reflected,uShininess)*uSpecular*mix(.2,1.,falloff)*(1.-rough*.7);
+  float explicitSpecular=pow(reflected,uShininess)*uSpecular*mix(.2,1.,falloff)*(1.-rough*.7)*diffuse;
   float sky=max(dot(N,normalize((viewMatrix*vec4(0,1,0,0)).xyz))*.5+.5,0.);
   float rim=pow(1.-max(dot(N,V),0.),4.);
   vec3 lit=color*(uAmbient+diffuse*uLight)*uLightColor;
   if(!uExplicitLighting)lit+=color*sky*.04;
-  lit+=mix(uLightColor,color*uLightColor,uMetalness)*(uExplicitLighting?explicitSpecular:specular*uLight*(uStyle>1.5?.12:.55));
+  // Rock/water are dielectric: retain a small highlight instead of a white
+  // mirror lobe. Metalness still continuously selects a coloured reflection.
+  lit+=mix(uLightColor*.16,color*uLightColor,uMetalness)*(uExplicitLighting?explicitSpecular:specular*uLight*(uStyle>1.5?.12:.55));
   lit+=climateSurfaceGlow(p)+uPalette[2]*emission*uEmission+uRimColor*rim*uRimStrength;
   gl_FragColor=vec4(lit,1.);
   #include <tonemapping_fragment>

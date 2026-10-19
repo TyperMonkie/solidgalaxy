@@ -28,6 +28,8 @@ export function createClouds(s:RenderSpec){
     fragmentShader:noise+climateGLSL+`
       uniform float uTime,uDensity,uOpacity,uScale,uSpeed,uAmbient,uLight;uniform mat4 modelMatrix;uniform vec3 uColor,uLightDirection,uLightColor;uniform sampler2D pointTexture;varying vec3 fragPosition;
       void main(){vec3 R=normalize((modelMatrix*vec4(fragPosition,0.)).xyz);vec3 L=normalize(uLightDirection);float light=uAmbient+uLight*max(0.,dot(R,L));
+      // A soft illumination shoulder retains cloud texture at bright key lights.
+      light=light/(1.+light);
       float n=simplex3(vec3(uTime*uSpeed)+fragPosition/uScale);float alpha=uOpacity*clamp(n+uDensity,0.,1.)*climateCloudTransmission(uClimateCloudRotation*fragPosition);
       gl_FragColor=vec4(light*uColor*uLightColor,alpha)*texture2D(pointTexture,gl_PointCoord);
       #include <tonemapping_fragment>

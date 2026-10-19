@@ -48,7 +48,7 @@ export class PlanetCore {
     this.spec=validateRenderSpec(spec);
     this.paused=!spec.animation.enabled;
     this.renderer=new WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});
-    this.renderer.setClearColor(0x020306,0);this.renderer.toneMapping=ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.15;
+    this.renderer.setClearColor(0x020306,0);this.renderer.toneMapping=ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;
     const pmrem=new PMREMGenerator(this.renderer),room=new RoomEnvironment();this.environment=pmrem.fromScene(room,.04);this.scene.environment=this.environment.texture;room.dispose();pmrem.dispose();
     this.renderer.domElement.setAttribute('aria-label','Interactive procedural planet. Drag to orbit; scroll to zoom.');this.renderer.domElement.setAttribute('role','img');
     host.appendChild(this.renderer.domElement);this.camera.position.set(0,.15,6.8);
